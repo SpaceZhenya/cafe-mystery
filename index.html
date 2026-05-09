@@ -335,6 +335,46 @@
             opacity: 1;
         }
 
+        .chapter-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            color: #d4af37;
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.6), 0 0 80px rgba(100, 0, 150, 0.3);
+            letter-spacing: 6px;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 2s ease-out;
+            text-align: center;
+        }
+
+        .chapter-title.visible {
+            opacity: 1;
+        }
+
+        .chapter-indicator {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            color: rgba(212, 175, 55, 0.4);
+            letter-spacing: 4px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .chapter-indicator.visible {
+            opacity: 1;
+        }
+
         .vignette {
             position: absolute;
             top: 0;
@@ -401,6 +441,9 @@
         <div class="notification" id="notification">
             <div class="notification-text" id="notification-text"></div>
         </div>
+
+        <div class="chapter-title" id="chapter-title"></div>
+        <div class="chapter-indicator" id="chapter-indicator">Глава 1: Ночное Кафе</div>
         
         <div class="loading" id="loading">ЗАГРУЗКА...</div>
     </div>
@@ -419,7 +462,10 @@
             cluesFound: 0,
             talkedTo: {},
             day: 1,
-            ending: null
+            chapter: 1,
+            ending: null,
+            sergeyRescued: false,
+            basementSecretFound: false
         };
         
         // Input and Audio
@@ -610,6 +656,133 @@
                         choices: [
                             { text: "Отойти", next: null }
                         ]
+                    },
+                    change_topic: {
+                        text: "'Как хочешь', — она пожимает плечами и отводит взгляд.",
+                        choices: [
+                            { text: "Вернуться к теме", next: "curious" }
+                        ]
+                    },
+                    dismissive: {
+                        text: "'Туристы здесь — редкость', — сухо замечает она. 'Особенно в такое время.'",
+                        choices: [
+                            { text: "Присесть рядом", next: "curious" }
+                        ]
+                    },
+                    dismissive2: {
+                        text: "Она понимающе кивает, но в глазах мелькает разочарование.",
+                        choices: [
+                            { text: "Всё же рассказать правду", next: "reveal" }
+                        ]
+                    },
+                    no_item: {
+                        text: "'Жаль', — она качает головой. 'Приходи, когда найдёшь что-то стоящее.'",
+                        choices: [
+                            { text: "Отойти", next: "end_conversation" }
+                        ]
+                    }
+                },
+                chapter2: {
+                    intro_ch2: {
+                        text: "Элена стоит у стеллажа с книгами в подвале. 'Ты всё-таки спустился. Я знала, что ты найдёшь путь.'",
+                        choices: [
+                            { text: "Что здесь происходит?", next: "ch2_explain", relation: 10 },
+                            { text: "Кто ты на самом деле?", next: "ch2_who" }
+                        ]
+                    },
+                    ch2_explain: {
+                        text: "'Это место — не просто подвал. Это хранилище. Маркус собирал не просто ценности — он собирал тайны. Каждая вещь здесь хранит частицу чьей-то души.'",
+                        choices: [
+                            { text: "Зачем ты здесь?", next: "ch2_purpose", relation: 5 },
+                            { text: "Как отсюда выбраться?", next: "ch2_escape" }
+                        ]
+                    },
+                    ch2_who: {
+                        text: "'Я была его ученицей. Последней, кто видел его перед исчезновением. Он сказал мне: 'Если кто-то придёт искать — направь его. Но не дай коллекции поглотить его.''",
+                        choices: [
+                            { text: "Коллекция поглощает?", next: "ch2_devours", relation: 15 },
+                            { text: "Почему ты не остановила меня?", next: "ch2_stop" }
+                        ]
+                    },
+                    ch2_purpose: {
+                        text: "'Я хранительница. Моя задача — следить, чтобы коллекция не попала в плохие руки. Но я чувствую... она хочет тебя. В ней есть своя воля.'",
+                        choices: [
+                            { text: "Что мне делать?", next: "ch2_advice", relation: 20 },
+                            { text: "Я не боюсь", next: "ch2_brave", relation: -5 }
+                        ]
+                    },
+                    ch2_escape: {
+                        text: "'Выход есть только через испытание. Коллекция сама выберет, достоин ли ты уйти. Пройди три пробы — и она откроет тебе дверь.'",
+                        choices: [
+                            { text: "Какие пробы?", next: "ch2_trials", relation: 10 }
+                        ]
+                    },
+                    ch2_devours: {
+                        text: "'Она забирает память, волю, саму сущность. Сергей — тому пример. Он пытался украсть брошь и остался в ловушке между мирами.'",
+                        effect: { clue: "коллекция пожирает души" },
+                        choices: [
+                            { text: "Как спасти Сергея?", next: "ch2_save_serg" },
+                            { text: "Я всё равно пойду", next: "ch2_determined", relation: 15 }
+                        ]
+                    },
+                    ch2_stop: {
+                        text: "'Я не могла. Ты должен был сам всё увидеть. Иногда правда — единственный учитель.' Она отводит взгляд. 'Но я здесь, чтобы помочь.'",
+                        choices: [
+                            { text: "Помоги мне", next: "ch2_advice", relation: 25 }
+                        ]
+                    },
+                    ch2_advice: {
+                        text: "'Слушай своё сердце. Коллекция лжёт, искажает реальность. Но правду не спрячешь за иллюзиями. Иди в центр зала — там ждёт главное испытание.'",
+                        effect: { clue: "центр зала — главное испытание" },
+                        choices: [
+                            { text: "Идти в центр", next: "end_ch2_elena" }
+                        ]
+                    },
+                    ch2_brave: {
+                        text: "'Храбрец. Или глупец.' Она грустно улыбается. 'Но выбора у тебя всё равно нет. Иди в центр зала. Там — твоя судьба.'",
+                        choices: [
+                            { text: "Идти в центр", next: "end_ch2_elena" }
+                        ]
+                    },
+                    ch2_trials: {
+                        text: "'Проба страха, проба жадности и проба истины. Каждая — часть коллекции. Не поддавайся иллюзиям — и пройдёшь.'",
+                        effect: { quest: "пройти три пробы коллекции" },
+                        choices: [
+                            { text: "Я готов", next: "ch2_advice", relation: 10 }
+                        ]
+                    },
+                    ch2_save_serg: {
+                        text: "'Его спасёт только уничтожение коллекции. Если разбить главный артефакт — все души освободятся.' Она шепчет: 'Но тогда исчезнет и само кафе.'",
+                        choices: [
+                            { text: "Я уничтожу коллекцию", next: "ch2_destroy_path", relation: 20 },
+                            { text: "Этого я не могу допустить", next: "ch2_keep_path", relation: -10 }
+                        ]
+                    },
+                    ch2_destroy_path: {
+                        text: "'Ты смелее, чем я думала. Главный артефакт — золотая сфера в центре коллекции. Разбей её — и всё закончится.'",
+                        effect: { addItem: "знание об артефакте" },
+                        choices: [
+                            { text: "Я запомню", next: "end_ch2_elena" }
+                        ]
+                    },
+                    ch2_keep_path: {
+                        text: "'Многие так говорят. А потом коллекция забирает их.' Она вздыхает. 'Надеюсь, ты окажешься сильнее.'",
+                        choices: [
+                            { text: "Увидим", next: "end_ch2_elena" }
+                        ]
+                    },
+                    ch2_determined: {
+                        text: "'Знаю, что не остановлю. Тогда прими это.' Она протягивает вам старый компас. 'Он укажет путь, когда иллюзии сомкнутся вокруг тебя.'",
+                        effect: { addItem: "компас Элены" },
+                        choices: [
+                            { text: "Спасибо", next: "end_ch2_elena" }
+                        ]
+                    },
+                    end_ch2_elena: {
+                        text: "Элена кивает вам на прощание и растворяется в темноте подвала.",
+                        choices: [
+                            { text: "Идти дальше", next: null }
+                        ]
                     }
                 }
             },
@@ -769,6 +942,167 @@
                         text: "Марко возвращается к работе. Вы чувствуете на себе его взгляд.",
                         choices: [
                             { text: "Отойти", next: null }
+                        ]
+                    },
+                    silence: {
+                        text: "Вы молча пьёте кофе. Марко понимающе кивает и отходит к другим посетителям.",
+                        choices: [
+                            { text: "Окликнуть его", next: "curious" }
+                        ]
+                    },
+                    riddle: {
+                        text: "'В этом кафе каждый ищет что-то своё', — загадочно улыбается он. 'А ты, похоже, нашёл то, что искал.'",
+                        choices: [
+                            { text: "Я ищу коллекцию", next: "founder_q", relation: 10 }
+                        ]
+                    },
+                    too_old: {
+                        text: "Марко грустно смотрит в пустоту. 'Для меня — нет. Я помню каждый день, проведённый здесь.'",
+                        choices: [
+                            { text: "Расскажите", next: "marco_story", relation: 5 }
+                        ]
+                    },
+                    photos_detail: {
+                        text: "'На той фотографии — Маркус в день открытия. Он сам повесил её сюда в памятный вечер.'",
+                        choices: [
+                            { text: "Рассмотреть ближе", next: "photos" }
+                        ]
+                    },
+                    key_where: {
+                        text: "'Понятия не имею', — он разводит руками. 'Маркус хранил его где-то в кафе. Может, у Нины спроси?'",
+                        choices: [
+                            { text: "Спросить Нину", next: "end_conv" }
+                        ]
+                    },
+                    refuse_drink: {
+                        text: "Марко убирает коктейль. 'Как знаешь. Но видение — это не всегда плохо. Оно открывает глаза.'",
+                        choices: [
+                            { text: "Передумать", next: "special_drink" }
+                        ]
+                    },
+                    later: {
+                        text: "'В любое время', — кивает он и возвращается к своим стаканам.",
+                        choices: [
+                            { text: "Заказать кофе", next: "coffee" }
+                        ]
+                    },
+                    basement_scene: {
+                        text: "Лестница уходит в густую темноту. Слышен запах сырости, старой бумаги и чего-то ещё... необъяснимого.",
+                        choices: [
+                            { text: "Спуститься в подвал", next: null }
+                        ]
+                    },
+                    short: {
+                        text: "Он коротко кивает. 'Будет готов через минуту.' Через минуту перед вами появляется чашка дымящегося кофе.",
+                        choices: [
+                            { text: "Пить кофе", next: "coffee" }
+                        ]
+                    }
+                },
+                chapter2: {
+                    intro_ch2: {
+                        text: "Марко сидит на ящике в углу подвала, перебирая старые бумаги. 'А вот и ты. Знал, что ты спустишься. Чувствовал.'",
+                        choices: [
+                            { text: "Ты тоже здесь?", next: "ch2_here" },
+                            { text: "Что это за место?", next: "ch2_place" }
+                        ]
+                    },
+                    ch2_here: {
+                        text: "'Я живу здесь большую часть времени. Присматриваю за коллекцией. Маркус перед уходом попросил меня беречь её.' Он горько усмехается. 'Ушёл, а я остался.'",
+                        choices: [
+                            { text: "Почему ты не ушёл?", next: "ch2_stay" },
+                            { text: "Ты знаешь, как её уничтожить?", next: "ch2_destroy" }
+                        ]
+                    },
+                    ch2_place: {
+                        text: "'Это сердце кафе. Самое старое помещение в здании. Коллекция питается от этого места — от воспоминаний, от эмоций посетителей.'",
+                        choices: [
+                            { text: "Это опасно?", next: "ch2_danger", relation: 10 },
+                            { text: "Как пройти испытания?", next: "ch2_trials_marco" }
+                        ]
+                    },
+                    ch2_stay: {
+                        text: "'Я дал слово. И потом...' он смотрит на свои руки. 'Коллекция уже часть меня. Если я уйду — она заберёт часть души.'",
+                        choices: [
+                            { text: "Я помогу тебе освободиться", next: "ch2_free", relation: 20 },
+                            { text: "Ты боишься?", next: "ch2_afraid", relation: -5 }
+                        ]
+                    },
+                    ch2_destroy: {
+                        text: "Марко резво поднимает голову. 'Уничтожить? Зачем? Это же величайшее собрание... Хотя...' Он замолкает. 'Она забирает людей. Я видел.'",
+                        choices: [
+                            { text: "Можно ли её уничтожить?", next: "ch2_can_destroy" },
+                            { text: "Можно ли её контролировать?", next: "ch2_control" }
+                        ]
+                    },
+                    ch2_danger: {
+                        text: "'Опасно — не то слово. Она читает твои мысли, твои страхи. Воплощает их. Чтобы пройти — нужно быть честным с самим собой.'",
+                        choices: [
+                            { text: "Как мне подготовиться?", next: "ch2_prepare", relation: 15 }
+                        ]
+                    },
+                    ch2_trials_marco: {
+                        text: "'Три испытания. Страх, жадность, истина. Но есть и четвёртое — выбор. Именно он решает твою судьбу.'",
+                        choices: [
+                            { text: "Что за выбор?", next: "ch2_choice", relation: 10 }
+                        ]
+                    },
+                    ch2_free: {
+                        text: "'Ты серьёзно?' В его глазах загорается надежда. 'Если разбить сердце коллекции — золотой шар в центре — все привязанные к ней души освободятся. Включая меня.'",
+                        choices: [
+                            { text: "Я сделаю это", next: "ch2_agreed", relation: 25 },
+                            { text: "Мне нужно подумать", next: "end_ch2_marco" }
+                        ]
+                    },
+                    ch2_afraid: {
+                        text: "'Боюсь. Глупо не бояться. Но страх не остановит меня. Как и тебя, надеюсь.'",
+                        choices: [
+                            { text: "Ты прав. Я не остановлюсь", next: "ch2_free", relation: 10 }
+                        ]
+                    },
+                    ch2_can_destroy: {
+                        text: "'Можно... если знать как. Нужно одновременно коснуться трёх символов на основании пьедестала. Но коснуться должен тот, кто чист душой.'",
+                        effect: { clue: "символы на пьедестале" },
+                        choices: [
+                            { text: "Я попробую", next: "ch2_prepare", relation: 15 }
+                        ]
+                    },
+                    ch2_control: {
+                        text: "'Никто не может. Маркус пытался — и исчез. Коллекция сильнее любого человека. Её можно только принять или уничтожить.'",
+                        choices: [
+                            { text: "Я уничтожу её", next: "ch2_free", relation: 20 },
+                            { text: "Я приму её", next: "ch2_accept", relation: -15 }
+                        ]
+                    },
+                    ch2_prepare: {
+                        text: "'Возьми это.' Он протягивает старый ключ с красным камнем. 'Он открывает проход к сердцу коллекции. Без него не пройти.'",
+                        effect: { addItem: "ключ Марко" },
+                        choices: [
+                            { text: "Спасибо", next: "end_ch2_marco" }
+                        ]
+                    },
+                    ch2_choice: {
+                        text: "'Коллекция предложит тебе что-то. Что-то, что ты хочешь больше всего. Не бери. Это ловушка. Истинная награда — не в вещах.'",
+                        choices: [
+                            { text: "Я запомню", next: "end_ch2_marco", relation: 20 }
+                        ]
+                    },
+                    ch2_agreed: {
+                        text: "'Тогда иди. Я буду ждать здесь. Если у тебя получится — я наконец буду свободен.'",
+                        choices: [
+                            { text: "Я вернусь", next: "end_ch2_marco" }
+                        ]
+                    },
+                    ch2_accept: {
+                        text: "'Ты не понимаешь, что говоришь. Никто не принимает коллекцию. Она принимает тебя. И ты уже никогда не будешь прежним.'",
+                        choices: [
+                            { text: "Посмотрим", next: "end_ch2_marco" }
+                        ]
+                    },
+                    end_ch2_marco: {
+                        text: "Марко отворачивается и продолжает перебирать бумаги, погружённый в свои мысли.",
+                        choices: [
+                            { text: "Идти дальше", next: null }
                         ]
                     }
                 }
@@ -941,11 +1275,161 @@
                         choices: [
                             { text: "Отойти", next: null }
                         ]
+                    },
+                    suspicious: {
+                        text: "Нина настороженно смотрит на вас. 'Ты что, из них? Из тех, кто охотится за коллекцией?'",
+                        choices: [
+                            { text: "Из кого?", next: "from_them" }
+                        ]
+                    },
+                    not_seen: {
+                        text: "'Он где-то здесь... я чувствую', — она нервно оглядывается по сторонам.",
+                        choices: [
+                            { text: "Помочь найти", next: "search_cafe" }
+                        ]
+                    },
+                    call_marco: {
+                        text: "Марко подходит, смотрит на Сергея и качает головой. 'Опять.' Он трогает пульс Сергея и хмурится.",
+                        effect: { clue: "Марко знает о Сергее" },
+                        choices: [
+                            { text: "Что значит 'опять'?", next: "marco_knows" }
+                        ]
+                    },
+                    leave_him: {
+                        text: "Вы отходите от Сергея. Нина облегчённо выдыхает и жестом просит вас подойти.",
+                        choices: [
+                            { text: "Поговорить с Ниной", next: "approach" }
+                        ]
+                    },
+                    threat: {
+                        text: "'Нет, что ты', — она качает головой. 'Просто предупреждение. Это место — ловушка для душ.'",
+                        choices: [
+                            { text: "Как выбраться?", next: "how_leave" }
+                        ]
+                    },
+                    from_them: {
+                        text: "'Из тех, кто ищет коллекцию Маркуса. Многие хотят её найти. И многие... пропадают в подвале.'",
+                        choices: [
+                            { text: "Я не из них. Я хочу помочь", next: "help_offer", relation: 10 }
+                        ]
+                    },
+                    marco_knows: {
+                        text: "'Сергей — не первый, кто впал в транс после поисков коллекции. Маркус защитил её странным образом. Защита наказала его.'",
+                        choices: [
+                            { text: "Как снять транс?", next: "wake_him" }
+                        ]
+                    }
+                },
+                chapter2: {
+                    intro_ch2: {
+                        text: "Нина сидит на корточках у стены подвала, обхватив колени. Увидев вас, она вскакивает. 'Ты спустился! Я... я не думала, что ты действительно придёшь.'",
+                        choices: [
+                            { text: "Ты знала, что я приду?", next: "ch2_knew" },
+                            { text: "Что ты здесь делаешь?", next: "ch2_what_doing" }
+                        ]
+                    },
+                    ch2_knew: {
+                        text: "'Мне сказал Сергей. Вернее... его дух. Когда он в трансе, он видит будущее. Он показал мне — ты спустишься и всё изменишь.'",
+                        choices: [
+                            { text: "Что я должен изменить?", next: "ch2_change" },
+                            { text: "Сергей может видеть будущее?", next: "ch2_future", relation: 10 }
+                        ]
+                    },
+                    ch2_what_doing: {
+                        text: "'Я ищу дневник отца. Маркуса. Он был моим отцом.' Её голос дрожит. 'Я хочу понять, почему он оставил меня. И как остановить этот кошмар.'",
+                        choices: [
+                            { text: "Маркус — твой отец?!", next: "ch2_shock", relation: 15 },
+                            { text: "Чем я могу помочь?", next: "ch2_help_nina" }
+                        ]
+                    },
+                    ch2_change: {
+                        text: "'Коллекцию. Её нужно остановить. Отец создал её, чтобы сохранить воспоминания... но она вышла из-под контроля. Теперь она питается людьми.'",
+                        choices: [
+                            { text: "Как её остановить?", next: "ch2_stop_collection" },
+                            { text: "Можно ли её спасти?", next: "ch2_save_collection", relation: -10 }
+                        ]
+                    },
+                    ch2_future: {
+                        text: "'Он видит обрывки. Но одно ясно точно: у тебя есть выбор. Ты можешь уничтожить коллекцию, забрать её силу или запечатать навсегда.'",
+                        choices: [
+                            { text: "Что ты советуешь?", next: "ch2_advice_nina", relation: 20 }
+                        ]
+                    },
+                    ch2_shock: {
+                        text: "'Да. Я не говорила раньше, потому что не доверяла. Но теперь... теперь ты должен знать правду. Коллекция — это его душа. Если её уничтожить — он исчезнет навсегда.'",
+                        choices: [
+                            { text: "Но он уже исчез", next: "ch2_gone" },
+                            { text: "Я не буду уничтожать её", next: "ch2_promise", relation: 25 }
+                        ]
+                    },
+                    ch2_help_nina: {
+                        text: "'Просто... будь осторожен. Коллекция чувствует страх. Она использует твои слабости. И не верь тому, что увидишь — это иллюзии.'",
+                        choices: [
+                            { text: "Я буду осторожен", next: "ch2_advice_nina", relation: 10 }
+                        ]
+                    },
+                    ch2_stop_collection: {
+                        text: "'Нужно разбить сердце коллекции — золотую сферу в центре зала. Но это опасно. Отец говорил, что сфера — это якорь, удерживающий все души.'",
+                        effect: { clue: "золотая сфера = сердце коллекции" },
+                        choices: [
+                            { text: "Я разобью её", next: "ch2_destroy_nina", relation: 15 },
+                            { text: "Я подумаю", next: "end_ch2_nina" }
+                        ]
+                    },
+                    ch2_save_collection: {
+                        text: "'Спасти? Она пожирает людей! Моего отца она сожрала!' В её глазах слёзы. 'Не повторяй его ошибок.'",
+                        choices: [
+                            { text: "Ты права. Я остановлю её", next: "ch2_destroy_nina", relation: 20 }
+                        ]
+                    },
+                    ch2_advice_nina: {
+                        text: "'В центре зала будет выбор. Коллекция предложит тебе награду. Не бери ничего. Просто разбей сферу — и всё закончится.'",
+                        choices: [
+                            { text: "Я так и сделаю", next: "end_ch2_nina", relation: 15 }
+                        ]
+                    },
+                    ch2_gone: {
+                        text: "'Для мира — да. Но его душа всё ещё здесь, в коллекции. Я чувствую её. Если разбить сферу — я потеряю его навсегда.' Голос её срывается.",
+                        choices: [
+                            { text: "Прости. Я не знал", next: "ch2_sorry", relation: 15 },
+                            { text: "Возможно, это единственный выход", next: "ch2_harsh", relation: -10 }
+                        ]
+                    },
+                    ch2_promise: {
+                        text: "'Правда?' Она смотрит на вас с надеждой. 'Тогда, может быть... может быть, я смогу ещё раз увидеть его. Поговорить с ним.'",
+                        choices: [
+                            { text: "Я помогу тебе", next: "end_ch2_nina", relation: 25 }
+                        ]
+                    },
+                    ch2_destroy_nina: {
+                        text: "'Спасибо. Возьми это.' Она протягивает маленький серебряный колокольчик. 'Когда будешь у сферы — позвони. Это отвлечёт коллекцию на мгновение.'",
+                        effect: { addItem: "серебряный колокольчик" },
+                        choices: [
+                            { text: "Я запомню", next: "end_ch2_nina" }
+                        ]
+                    },
+                    ch2_sorry: {
+                        text: "'Всё в порядке. Ты не виноват. Но теперь ты знаешь правду. Выбор за тобой.' Она вытирает слёзы. 'Что бы ты ни решил — я приму.'",
+                        choices: [
+                            { text: "Я постараюсь сделать правильный выбор", next: "end_ch2_nina", relation: 10 }
+                        ]
+                    },
+                    ch2_harsh: {
+                        text: "Нина отворачивается. 'Может быть. Но я не готова его потерять. Не сегодня.'",
+                        choices: [
+                            { text: "Я найду другой способ", next: "end_ch2_nina" }
+                        ]
+                    },
+                    end_ch2_nina: {
+                        text: "Нина отворачивается к стене, пряча слёзы. В темноте подвала её фигура кажется особенно хрупкой.",
+                        choices: [
+                            { text: "Идти дальше", next: null }
+                        ]
                     }
                 }
             }
         };
-
+ 
         // Initialize Three.js scene
         function init() {
             const container = document.getElementById('canvas-container');
@@ -1714,22 +2198,28 @@
             window.raycaster.setFromCamera(window.mouse, camera);
             const intersects = window.raycaster.intersectObjects(scene.children, true);
             
-            let clickedNPC = null;
+            let clickedObject = null;
             intersects.forEach(intersect => {
-                if (intersect.object.parent && intersect.object.parent.userData && intersect.object.parent.userData.id) {
-                    clickedNPC = intersect.object.parent;
+                let obj = intersect.object;
+                if (obj.parent && obj.parent.userData && obj.parent.userData.id) {
+                    clickedObject = obj.parent;
+                } else if (obj.userData && obj.userData.id) {
+                    clickedObject = obj;
                 }
             });
             
-            if (clickedNPC && clickedNPC.userData.id) {
-                if (clickedNPC.userData.id === 'gramophone') {
+            if (clickedObject && clickedObject.userData) {
+                const u = clickedObject.userData;
+                if (u.id === 'gramophone') {
                     toggleMusic();
-                } else if (clickedNPC.userData.isItem) {
-                    collectItem(clickedNPC);
-                } else if (clickedNPC.userData.isDoor) {
+                } else if (u.isItem) {
+                    collectItem(clickedObject);
+                } else if (u.isDoor) {
                     showEnding();
-                } else {
-                    startDialogue(clickedNPC.userData.id);
+                } else if (u.id === 'golden_sphere') {
+                    showFinalChoice();
+                } else if (u.id) {
+                    startDialogue(u.id);
                 }
             }
         }
@@ -1824,8 +2314,15 @@
             // Update NPC status
             updateNPCStatus();
             
-            // Show dialogue box
-            showDialogue(npcId, npcData[npcId].dialogueTree.intro);
+            // Chapter-aware dialogue
+            const tree = gameState.chapter === 2 && npcData[npcId].chapter2
+                ? npcData[npcId].chapter2
+                : npcData[npcId].dialogueTree;
+            
+            const startNode = gameState.chapter === 2 ? 'intro_ch2' : 'intro';
+            const node = tree[startNode] || tree.intro || Object.values(tree)[0];
+            
+            showDialogue(npcId, node);
             
             // Mark as talked to
             gameState.talkedTo[npcId] = true;
@@ -1934,9 +2431,14 @@
                 return;
             }
             
-            const tree = npcData[npcId].dialogueTree;
+            const tree = gameState.chapter === 2 && npcData[npcId].chapter2
+                ? npcData[npcId].chapter2
+                : npcData[npcId].dialogueTree;
+            
             if (tree[choice.next]) {
                 showDialogue(npcId, tree[choice.next]);
+            } else if (npcData[npcId].dialogueTree[choice.next]) {
+                showDialogue(npcId, npcData[npcId].dialogueTree[choice.next]);
             }
         }
         
@@ -1982,6 +2484,16 @@
             if (effect.trigger === 'go_to_basement') {
                 showEnding();
             }
+            
+            if (effect.trigger === 'ending_destroy') {
+                triggerEnding('destroy');
+            }
+            if (effect.trigger === 'ending_seal') {
+                triggerEnding('seal');
+            }
+            if (effect.trigger === 'ending_power') {
+                triggerEnding('power');
+            }
         }
         
         function updateInventory() {
@@ -1996,7 +2508,11 @@
                 'фотография основателя': '📷',
                 'амулет защиты': '🔮',
                 'видение двери': '👁',
-                'коллекция = свобода': '💎'
+                'коллекция = свобода': '💎',
+                'компас Элены': '🧭',
+                'ключ Марко': '🗝️',
+                'серебряный колокольчик': '🔔',
+                'знание об артефакте': '📖'
             };
             
             gameState.inventory.forEach(item => {
@@ -2043,29 +2559,196 @@
             }, 3000);
         }
         
-        function showEnding() {
-            // End game - player goes to basement
-            const dialogueBox = document.getElementById('dialogue-box');
-            dialogueBox.innerHTML = `
-                <div class="speaker-name">Эпилог</div>
+        function showFinalChoice() {
+            const sphereChoice = document.getElementById('dialogue-box');
+            sphereChoice.innerHTML = `
+                <div class="speaker-name">✦ Сердце Коллекции ✦</div>
                 <div class="dialogue-text">
-                    Вы спускаетесь по каменной лестнице в подвал. За вами — история этого места, 
-                    отношения с его обитателями, и то, что вы узнали. Впереди — тайна коллекции Маркуса.
-                    <br><br>
-                    То, что вы найдёте там, изменит всё.
-                    <br><br>
-                    <em>Конец первой главы...</em>
+                    Перед вами пульсирующая золотая сфера. В ней — сила коллекции, души всех, кто был здесь до вас, 
+                    и ключ к разгадке тайны Маркуса. Сфера ждёт вашего решения...
                 </div>
                 <div class="choices">
-                    <button class="choice-btn" onclick="location.reload()">Начать заново</button>
+                    <button class="choice-btn" onclick="window.finishGame('destroy')">💥 Разбить сферу — освободить все души</button>
+                    <button class="choice-btn" onclick="window.finishGame('seal')">🔒 Запечатать коллекцию навсегда</button>
+                    <button class="choice-btn" onclick="window.finishGame('power')">🔥 Принять силу коллекции</button>
+                    <button class="choice-btn" onclick="endDialogue()">Отойти и подумать</button>
+                </div>
+            `;
+            sphereChoice.classList.add('visible');
+        }
+        
+        window.finishGame = function(type) {
+            const box = document.getElementById('dialogue-box');
+            box.classList.remove('visible');
+            setTimeout(() => applyEffect({ trigger: 'ending_' + type }), 300);
+        };
+        
+        function createChapter2Objects() {
+            // Golden sphere - the heart of the collection
+            const sphereGroup = new THREE.Group();
+            const sphereMat = new THREE.MeshStandardMaterial({
+                color: 0xd4af37,
+                emissive: 0xff6600,
+                emissiveIntensity: 0.8,
+                metalness: 0.9,
+                roughness: 0.1
+            });
+            const sphere = new THREE.Mesh(new THREE.SphereGeometry(0.3, 24, 24), sphereMat);
+            sphereGroup.add(sphere);
+            
+            // Glow aura
+            const glowCanvas = document.createElement('canvas');
+            glowCanvas.width = 128;
+            glowCanvas.height = 128;
+            const gCtx = glowCanvas.getContext('2d');
+            const grad = gCtx.createRadialGradient(64, 64, 0, 64, 64, 64);
+            grad.addColorStop(0, 'rgba(255, 200, 50, 0.3)');
+            grad.addColorStop(0.5, 'rgba(255, 100, 0, 0.1)');
+            grad.addColorStop(1, 'rgba(255, 50, 0, 0)');
+            gCtx.fillStyle = grad;
+            gCtx.fillRect(0, 0, 128, 128);
+            
+            const glowTex = new THREE.CanvasTexture(glowCanvas);
+            const glowSprite = new THREE.Sprite(
+                new THREE.SpriteMaterial({ map: glowTex, transparent: true, blending: THREE.AdditiveBlending })
+            );
+            glowSprite.scale.set(2, 2, 1);
+            sphereGroup.add(glowSprite);
+            
+            sphereGroup.position.set(0, 0.8, -1.5);
+            sphereGroup.userData = { id: 'golden_sphere', name: 'Сердце коллекции' };
+            scene.add(sphereGroup);
+            
+            showNotification('Вы чувствуете присутствие чего-то могущественного в центре подвала...');
+        }
+        
+        function transitionToChapter2() {
+            gameState.chapter = 2;
+            
+            // Fade out effect
+            const overlay = document.createElement('div');
+            overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#000;z-index:9999;opacity:0;transition:opacity 1.5s;pointer-events:none;';
+            document.body.appendChild(overlay);
+            setTimeout(() => overlay.style.opacity = '1', 100);
+            
+            setTimeout(() => {
+                // Change scene atmosphere
+                scene.background.setHex(0x050308);
+                scene.fog.color.setHex(0x050308);
+                scene.fog.density = 0.08;
+                
+                // Dim all lights
+                scene.children.forEach(c => {
+                    if (c.isLight) {
+                        if (c.intensity > 1) c.intensity *= 0.5;
+                        if (c.color) {
+                            const hex = c.color.getHex();
+                            c.color.setHex(hex); // keep same hue but dimmer
+                        }
+                    }
+                });
+                
+                // Eerie purple ambient
+                const ambient = new THREE.AmbientLight(0x1a0033, 0.4);
+                scene.add(ambient);
+                
+                // Show chapter title
+                const chTitle = document.getElementById('chapter-title');
+                const chIndicator = document.getElementById('chapter-indicator');
+                if (chTitle) {
+                    chTitle.textContent = '— Глава 2: Подвал Маркуса —';
+                    chTitle.classList.add('visible');
+                }
+                if (chIndicator) {
+                    chIndicator.textContent = 'Глава 2: Подвал Маркуса';
+                }
+                
+                setTimeout(() => {
+                    overlay.style.opacity = '0';
+                    setTimeout(() => {
+                        overlay.remove();
+                        if (chTitle) chTitle.classList.remove('visible');
+                        
+                        // Show notification
+                        showNotification('Подвал Маркуса. Будьте осторожны...');
+                        
+                        // Update hint
+                        const hint = document.getElementById('click-hint');
+                        if (hint) {
+                            hint.textContent = 'Поговорите с персонажами в подвале';
+                            hint.classList.add('visible');
+                            setTimeout(() => hint.classList.remove('visible'), 8000);
+                        }
+                    }, 1500);
+                }, 2500);
+            }, 1500);
+            
+            // Add chapter 2 objects after transition
+            setTimeout(() => createChapter2Objects(), 4000);
+        }
+        
+        function triggerEnding(endingType) {
+            gameState.ending = endingType;
+            
+            // Disable interaction
+            npcs.forEach(npc => { npc.userData.lookAtPlayer = false; });
+            
+            let title, text, btnText;
+            
+            if (endingType === 'destroy') {
+                title = '✧ Освобождение ✧';
+                text = `Вы разбиваете золотую сферу. По подвалу проносится волна света. 
+Коллекция рассыпается в пыль. Души, пленённые в ней, обретают свободу. 
+Марко исчезает с улыбкой. Сергей приходит в себя. Нина плачет — но впервые за долгое время — от облегчения.
+Кафе навсегда изменилось. Но вы чувствуете: вы сделали правильный выбор.`;
+                btnText = 'Закончить историю';
+            } else if (endingType === 'seal') {
+                title = '🔒 Печать 🔒';
+                text = `Вы запечатываете коллекцию, используя знания, полученные от Элены и Марко. 
+Сфера гаснет, но не разрушается — она погружается в сон. 
+Коллекция остаётся здесь, под кафе, но больше не угрожает никому. 
+Нина наконец находит покой. Марко остаётся хранителем. А вы уходите в рассвет. 
+Кафе продолжает работать — но теперь оно просто кафе.`;
+                btnText = 'Закончить историю';
+            } else if (endingType === 'power') {
+                title = '🔥 Власть 🔥';
+                text = `Вы принимаете дар коллекции. 
+Сфера вливается в вас — вы чувствуете невероятную силу. 
+Воспоминания сотен душ проносятся перед глазами. 
+Марко в ужасе отступает. Нина кричит вам вслед. Элена исчезает. 
+Вы выходите из кафе другим человеком. 
+Коллекция теперь — часть вас. Но что вы будете делать с этой силой?`;
+                btnText = 'Начать заново';
+            } else {
+                title = '✧ Судьба Кафе ✧';
+                text = `Вы принимаете своё решение — не под давлением, не из страха, а по зову сердца.
+Коллекция чувствует это. Она открывает вам тайну Маркуса: он не исчез, он стал частью коллекции — её хранителем.
+Вы берёте его место? Или уходите, оставляя всё как есть?
+Кафе продолжает жить. Тайна остаётся. И, может быть, когда-нибудь сюда придёт новый искатель...`;
+                btnText = 'Начать заново';
+            }
+            
+            const dialogueBox = document.getElementById('dialogue-box');
+            dialogueBox.innerHTML = `
+                <div class="speaker-name">${title}</div>
+                <div class="dialogue-text">
+                    ${text}
+                    <br><br>
+                    <em style="color:#8a847a">Отношения: Элена ${gameState.relationships.elena} · Марко ${gameState.relationships.marco} · Нина ${gameState.relationships.nina}</em>
+                    <br>
+                    <em style="color:#8a847a">Улик найдено: ${gameState.cluesFound}</em>
+                </div>
+                <div class="choices">
+                    <button class="choice-btn" onclick="location.reload()">${btnText}</button>
                 </div>
             `;
             dialogueBox.classList.add('visible');
-            
-            // Remove NPC interaction
-            npcs.forEach(npc => {
-                npc.userData.lookAtPlayer = false;
-            });
+        }
+        
+        function showEnding() {
+            if (gameState.chapter === 1) {
+                transitionToChapter2();
+            }
         }
         
         function startGame() {
@@ -2073,6 +2756,9 @@
             document.getElementById('intro').classList.add('hidden');
             updateNPCStatus();
             initAudio();
+            
+            document.getElementById('chapter-indicator').textContent = 'Глава 1: Ночное Кафе';
+            document.getElementById('chapter-indicator').classList.add('visible');
             
             const hintElem = document.getElementById('click-hint');
             hintElem.textContent = 'Используйте клавиши A и D для осмотра. Кликните на персонажа для разговора.';
