@@ -334,11 +334,43 @@
         .click-hint.visible {
             opacity: 1;
         }
+
+        .vignette {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 30%, rgba(20, 10, 0, 0.7) 100%);
+            z-index: 10;
+        }
+
+        .scanlines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: linear-gradient(
+                to bottom,
+                rgba(255,255,255,0),
+                rgba(255,255,255,0) 50%,
+                rgba(0,0,0,0.1) 50%,
+                rgba(0,0,0,0.1)
+            );
+            background-size: 100% 4px;
+            z-index: 11;
+            opacity: 0.3;
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
         <div id="canvas-container"></div>
+        <div class="vignette"></div>
+        <div class="scanlines"></div>
         
         <div class="intro-screen" id="intro">
             <div class="intro-title">ТАЙНА</div>
@@ -390,6 +422,87 @@
             ending: null
         };
         
+        // Input and Audio
+        let playerAngle = 0;
+        const keys = { a: false, d: false };
+
+        window.addEventListener('keydown', (e) => {
+            if(e.key.toLowerCase() === 'a' || e.key === 'ArrowLeft') keys.a = true;
+            if(e.key.toLowerCase() === 'd' || e.key === 'ArrowRight') keys.d = true;
+        });
+        window.addEventListener('keyup', (e) => {
+            if(e.key.toLowerCase() === 'a' || e.key === 'ArrowLeft') keys.a = false;
+            if(e.key.toLowerCase() === 'd' || e.key === 'ArrowRight') keys.d = false;
+        });
+
+        let audioContext;
+        let masterGain;
+        window.audioOscillators = [];
+        window.isJazz = false;
+        
+        function initAudio() {
+            if (audioContext) return;
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                masterGain = audioContext.createGain();
+                masterGain.gain.value = 0.2;
+                masterGain.connect(audioContext.destination);
+                
+                // Warm Cmaj7 chord
+                const freqs = [130.81, 164.81, 196.00, 246.94]; 
+                freqs.forEach(f => {
+                    const osc = audioContext.createOscillator();
+                    osc.type = 'sine';
+                    osc.frequency.value = f;
+                    const panner = audioContext.createStereoPanner ? audioContext.createStereoPanner() : audioContext.createGain();
+                    if (panner.pan) panner.pan.value = (Math.random() - 0.5) * 0.5;
+                    
+                    const filter = audioContext.createBiquadFilter();
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 400 + Math.random()*200;
+                    
+                    osc.connect(filter);
+                    filter.connect(panner);
+                    panner.connect(masterGain);
+                    osc.start();
+                    window.audioOscillators.push(osc);
+                });
+
+                // Fire crackle noise
+                const bufferSize = audioContext.sampleRate * 2;
+                const noiseBuffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) {
+                    output[i] = Math.random() > 0.995 ? Math.random() * 2 - 1 : 0;
+                }
+                const noise = audioContext.createBufferSource();
+                noise.buffer = noiseBuffer;
+                noise.loop = true;
+                
+                const noiseFilter = audioContext.createBiquadFilter();
+                noiseFilter.type = 'lowpass';
+                noiseFilter.frequency.value = 1000;
+                
+                noise.connect(noiseFilter);
+                noiseFilter.connect(masterGain);
+                noise.start();
+            } catch (e) {
+                console.log("Audio not supported");
+            }
+        }
+
+        function toggleMusic() {
+            if (!audioContext) return;
+            window.isJazz = !window.isJazz;
+            showNotification(window.isJazz ? "Граммофон: Режим повышенной тональности" : "Граммофон: Уютный режим");
+            
+            if (window.isJazz) {
+                window.audioOscillators.forEach(osc => { osc.frequency.value *= 1.25; });
+            } else {
+                window.audioOscillators.forEach(osc => { osc.frequency.value /= 1.25; });
+            }
+        }
+
         // NPC Data
         const npcData = {
             elena: {
@@ -839,8 +952,8 @@
             
             // Scene
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0a0806);
-            scene.fog = new THREE.Fog(0x0a0806, 5, 20);
+            scene.background = new THREE.Color(0x1a120c);
+            scene.fog = new THREE.Fog(0x1a120c, 5, 20);
             
             // Camera
             camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
@@ -869,6 +982,9 @@
             // NPCs
             createNPCs();
             
+            // Interactive items
+            createInteractables();
+            
             // Post-processing feel with particles
             createAmbientParticles();
             
@@ -894,13 +1010,19 @@
             scene.add(ambient);
             
             // Hemisphere light for general fill
-            const hemiLight = new THREE.HemisphereLight(0x4a3a25, 0x2a1a10, 0.7);
+            const hemiLight = new THREE.HemisphereLight(0x5a4a35, 0x3a2a20, 0.8);
             scene.add(hemiLight);
             
             // Main warm light (chandelier)
-            const mainLight = new THREE.SpotLight(0xe8c884, 5.0, 15, Math.PI / 3, 0.5, 1);
+            const mainLight = new THREE.SpotLight(0xffaa55, 5.0, 15, Math.PI / 3, 0.5, 1);
             mainLight.position.set(0, 5, 0);
             mainLight.castShadow = true;
+            
+            // Hearth / Fireplace light
+            const hearthLight = new THREE.PointLight(0xff6600, 3.0, 10);
+            hearthLight.position.set(-5, 1, -4);
+            hearthLight.userData.isHearth = true;
+            scene.add(hearthLight);
             mainLight.shadow.mapSize.width = 1024;
             mainLight.shadow.mapSize.height = 1024;
             scene.add(mainLight);
@@ -939,7 +1061,7 @@
         
         function createRoom() {
             // Floor - wooden
-            const floorGeo = new THREE.PlaneGeometry(12, 12);
+            const floorGeo = new THREE.PlaneGeometry(24, 24);
             const floorMat = new THREE.MeshStandardMaterial({
                 color: 0x2a1f15,
                 roughness: 0.9,
@@ -949,6 +1071,49 @@
             floor.rotation.x = -Math.PI / 2;
             floor.receiveShadow = true;
             scene.add(floor);
+            
+            // Cozy Rug
+            const rugGeo = new THREE.PlaneGeometry(7, 5);
+            const rugMat = new THREE.MeshStandardMaterial({ color: 0x5a2015, roughness: 1.0 });
+            const rug = new THREE.Mesh(rugGeo, rugMat);
+            rug.rotation.x = -Math.PI / 2;
+            rug.position.set(0, 0.01, 0);
+            scene.add(rug);
+            
+            // Window on the left wall
+            const windowGeo = new THREE.PlaneGeometry(4, 3);
+            const windowMat = new THREE.MeshStandardMaterial({ 
+                color: 0x050a15, 
+                roughness: 0.1, 
+                metalness: 0.8,
+                transparent: true,
+                opacity: 0.5
+            });
+            const windowMesh = new THREE.Mesh(windowGeo, windowMat);
+            windowMesh.position.set(-5.9, 3, 0);
+            windowMesh.rotation.y = Math.PI / 2;
+            scene.add(windowMesh);
+
+            // Rain particles outside window
+            const rainCount = 200;
+            const rainGeo = new THREE.BufferGeometry();
+            const rainPos = new Float32Array(rainCount * 3);
+            for(let i=0; i<rainCount; i++) {
+                rainPos[i*3] = -6.5 + Math.random();
+                rainPos[i*3+1] = Math.random() * 6;
+                rainPos[i*3+2] = (Math.random() - 0.5) * 5;
+            }
+            rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPos, 3));
+            const rainMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.05, transparent: true, opacity: 0.6 });
+            const rain = new THREE.Points(rainGeo, rainMat);
+            rain.userData.isRain = true;
+            scene.add(rain);
+
+            // Lightning light
+            const lightning = new THREE.PointLight(0xaaccff, 0, 20);
+            lightning.position.set(-6, 4, 0);
+            lightning.userData.isLightning = true;
+            scene.add(lightning);
             
             // Walls
             const wallMat = new THREE.MeshStandardMaterial({
@@ -962,20 +1127,26 @@
             backWall.position.set(0, 3, -5);
             scene.add(backWall);
             
+            // Front wall (closes the room behind the camera)
+            const frontWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat);
+            frontWall.position.set(0, 3, 9);
+            frontWall.rotation.y = Math.PI;
+            scene.add(frontWall);
+            
             // Side walls
-            const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat);
-            leftWall.position.set(-6, 3, 0);
+            const leftWall = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), wallMat);
+            leftWall.position.set(-6, 3, 2);
             leftWall.rotation.y = Math.PI / 2;
             scene.add(leftWall);
             
-            const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(12, 6), wallMat);
-            rightWall.position.set(6, 3, 0);
+            const rightWall = new THREE.Mesh(new THREE.PlaneGeometry(16, 6), wallMat);
+            rightWall.position.set(6, 3, 2);
             rightWall.rotation.y = -Math.PI / 2;
             scene.add(rightWall);
             
             // Ceiling with beams
             const ceiling = new THREE.Mesh(
-                new THREE.PlaneGeometry(12, 12),
+                new THREE.PlaneGeometry(24, 24),
                 new THREE.MeshStandardMaterial({ color: 0x151008, roughness: 1 })
             );
             ceiling.position.y = 5;
@@ -985,7 +1156,7 @@
             // Wooden beams
             for (let i = -2; i <= 2; i++) {
                 const beam = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.2, 0.3, 12),
+                    new THREE.BoxGeometry(0.2, 0.3, 24),
                     new THREE.MeshStandardMaterial({ color: 0x1a120a, roughness: 0.8 })
                 );
                 beam.position.set(i * 2.5, 4.85, 0);
@@ -1181,6 +1352,22 @@
             );
             clockBody.position.set(3, 3, -4.9);
             scene.add(clockBody);
+            
+            // Interactive Gramophone
+            const gramophone = new THREE.Group();
+            const gBase = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.5), new THREE.MeshStandardMaterial({color: 0x4a2a1a, roughness: 0.7}));
+            gBase.position.y = 0.1;
+            gramophone.add(gBase);
+            const hornGeo = new THREE.CylinderGeometry(0.3, 0.02, 0.6, 16, 1, true);
+            const hornMat = new THREE.MeshStandardMaterial({color: 0xd4af37, metalness: 0.9, roughness: 0.2, side: THREE.DoubleSide});
+            const horn = new THREE.Mesh(hornGeo, hornMat);
+            horn.position.set(0.1, 0.4, 0);
+            horn.rotation.z = Math.PI / 4;
+            gramophone.add(horn);
+
+            gramophone.position.set(-2, 1.05, -0.5); // On table 1
+            gramophone.userData = { id: 'gramophone', name: 'Граммофон' };
+            scene.add(gramophone);
         }
         
         function createPlant(x, z) {
@@ -1388,11 +1575,89 @@
             rightLeg.position.set(0.1, 0.35, 0);
             group.add(rightLeg);
             
-            group.position.set(position.x, position.y, position.z);
+            // Lower the whole character so the feet are exactly on the floor (y=0.1 -> y=0)
+            group.position.set(position.x, position.y - 0.1, position.z);
             
             return group;
         }
         
+        function createInteractables() {
+            // Golden Key
+            const keyGroup = new THREE.Group();
+            const keyGeo = new THREE.TorusGeometry(0.05, 0.02, 8, 16);
+            const keyMat = new THREE.MeshStandardMaterial({ color: 0xffd700, emissive: 0xffa500, emissiveIntensity: 0.8 });
+            const keyBody = new THREE.Mesh(keyGeo, keyMat);
+            keyGroup.add(keyBody);
+            
+            const keyTooth = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.06, 0.02), keyMat);
+            keyTooth.position.set(0.06, 0, 0);
+            keyGroup.add(keyTooth);
+            
+            keyGroup.position.set(4, 0.05, -0.5); // On the floor near right plant
+            keyGroup.rotation.x = Math.PI / 2;
+            keyGroup.userData = { id: 'item_key', name: 'ключ', isItem: true };
+            scene.add(keyGroup);
+            
+            // Torn diary page
+            const pageGeo = new THREE.PlaneGeometry(0.3, 0.4);
+            const pageMat = new THREE.MeshStandardMaterial({ color: 0xddddcc, side: THREE.DoubleSide, roughness: 1.0 });
+            const page = new THREE.Mesh(pageGeo, pageMat);
+            page.position.set(-1.8, 0.76, 0.2); // On a table
+            page.rotation.x = -Math.PI / 2;
+            page.rotation.z = 0.3;
+            page.userData = { id: 'item_note', name: 'схема подвала', isItem: true };
+            scene.add(page);
+        }
+
+        function collectItem(itemObj) {
+            const itemName = itemObj.userData.name;
+            if (!gameState.inventory.includes(itemName)) {
+                gameState.inventory.push(itemName);
+                updateInventory();
+                showNotification(`Вы нашли предмет: ${itemName}`);
+                scene.remove(itemObj);
+            }
+        }
+
+        function triggerVision() {
+            // Screen flash effect
+            const flash = document.createElement('div');
+            flash.style.position = 'fixed';
+            flash.style.top = '0';
+            flash.style.left = '0';
+            flash.style.width = '100%';
+            flash.style.height = '100%';
+            flash.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+            flash.style.pointerEvents = 'none';
+            flash.style.zIndex = '9999';
+            flash.style.transition = 'opacity 2.0s ease-out';
+            document.body.appendChild(flash);
+            
+            setTimeout(() => {
+                flash.style.opacity = '0';
+                setTimeout(() => flash.remove(), 2000);
+            }, 50);
+
+            // Change lighting to eerie purple
+            scene.children.forEach(c => {
+                if (c.isLight && !c.userData.isLightning) {
+                    if (c.intensity > 1) {
+                        c.color.setHex(0x5500aa); 
+                    }
+                }
+            });
+
+            // Make the hidden door appear behind the bar
+            const doorGeo = new THREE.PlaneGeometry(1.8, 3.5);
+            const doorMat = new THREE.MeshStandardMaterial({ color: 0x220000, emissive: 0x550000, emissiveIntensity: 0.5, metalness: 0.5, roughness: 0.5 });
+            const door = new THREE.Mesh(doorGeo, doorMat);
+            door.position.set(0, 1.75, -4.9);
+            door.userData = { id: 'secret_door', name: 'Спуск в подвал', isDoor: true };
+            scene.add(door);
+            
+            showNotification("Мир изменился... Вы видите скрытое.");
+        }
+
         function createAmbientParticles() {
             const particleCount = 100;
             const positions = new Float32Array(particleCount * 3);
@@ -1457,7 +1722,15 @@
             });
             
             if (clickedNPC && clickedNPC.userData.id) {
-                startDialogue(clickedNPC.userData.id);
+                if (clickedNPC.userData.id === 'gramophone') {
+                    toggleMusic();
+                } else if (clickedNPC.userData.isItem) {
+                    collectItem(clickedNPC);
+                } else if (clickedNPC.userData.isDoor) {
+                    showEnding();
+                } else {
+                    startDialogue(clickedNPC.userData.id);
+                }
             }
         }
         
@@ -1489,7 +1762,7 @@
                 }
             });
             
-            // Animate particles
+            // Animate dynamic elements
             scene.children.forEach(child => {
                 if (child.userData && child.userData.isParticles) {
                     const positions = child.geometry.attributes.position.array;
@@ -1499,11 +1772,42 @@
                     child.geometry.attributes.position.needsUpdate = true;
                     child.rotation.y = time * 0.05;
                 }
+                
+                if (child.userData && child.userData.isHearth) {
+                    child.intensity = 2.5 + Math.random() * 1.0;
+                }
+                
+                if (child.userData && child.userData.isRain) {
+                    const positions = child.geometry.attributes.position.array;
+                    for (let i = 0; i < positions.length; i += 3) {
+                        positions[i + 1] -= delta * 6; // fall speed
+                        if (positions[i + 1] < 0) positions[i + 1] = 6;
+                    }
+                    child.geometry.attributes.position.needsUpdate = true;
+                }
+                
+                if (child.userData && child.userData.isLightning) {
+                    if (Math.random() > 0.995) {
+                        child.intensity = 5 + Math.random() * 15;
+                    } else {
+                        child.intensity = Math.max(0, child.intensity - delta * 50);
+                    }
+                }
             });
             
-            // Subtle camera movement
-            camera.position.x = Math.sin(time * 0.1) * 0.3;
+            // Cinematic rail movement
+            if (keys.a) playerAngle -= 1.0 * delta;
+            if (keys.d) playerAngle += 1.0 * delta;
+            
+            playerAngle = Math.max(-Math.PI/2.5, Math.min(Math.PI/2.5, playerAngle));
+            
+            const baseX = Math.sin(playerAngle) * 6;
+            const baseZ = Math.cos(playerAngle) * 6;
+
+            // Subtle camera movement on top of rail position
+            camera.position.x = baseX + Math.sin(time * 0.1) * 0.3;
             camera.position.y = 3 + Math.sin(time * 0.15) * 0.1;
+            camera.position.z = baseZ;
             camera.lookAt(0, 1, 0);
             
             renderer.render(scene, camera);
@@ -1527,6 +1831,8 @@
             gameState.talkedTo[npcId] = true;
         }
         
+        let typeWriterInterval;
+
         function showDialogue(npcId, node) {
             const dialogueBox = document.getElementById('dialogue-box');
             const speakerName = document.getElementById('speaker-name');
@@ -1534,31 +1840,81 @@
             const choicesDiv = document.getElementById('choices');
             
             speakerName.textContent = npcData[npcId].name;
-            dialogueText.textContent = node.text;
-            
+            dialogueText.textContent = '';
             choicesDiv.innerHTML = '';
             
-            if (node.choices) {
-                node.choices.forEach(choice => {
-                    const btn = document.createElement('button');
-                    btn.className = 'choice-btn';
-                    btn.textContent = choice.text;
-                    
-                    // Check if choice requires item
-                    const canChoose = !choice.requires || gameState.inventory.includes(choice.requires);
-                    
-                    if (canChoose) {
-                        btn.onclick = () => handleChoice(npcId, choice);
-                    } else {
-                        btn.style.opacity = '0.5';
-                        btn.textContent += ' (нужен предмет)';
-                    }
-                    
-                    choicesDiv.appendChild(btn);
-                });
-            }
-            
             dialogueBox.classList.add('visible');
+            
+            if (typeWriterInterval) clearInterval(typeWriterInterval);
+            
+            let charIndex = 0;
+            const fullText = node.text;
+            
+            let skipHint = document.getElementById('skip-hint');
+            if (!skipHint) {
+                skipHint = document.createElement('div');
+                skipHint.style.fontSize = '12px';
+                skipHint.style.color = '#8a847a';
+                skipHint.style.marginTop = '10px';
+                skipHint.style.textAlign = 'right';
+                skipHint.textContent = 'Кликните для пропуска';
+                skipHint.id = 'skip-hint';
+                dialogueBox.appendChild(skipHint);
+            }
+            skipHint.style.display = 'block';
+            
+            const showChoices = () => {
+                if (node.choices) {
+                    node.choices.forEach((choice, idx) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'choice-btn';
+                        btn.textContent = choice.text;
+                        
+                        btn.style.opacity = '0';
+                        btn.style.transform = 'translateY(10px)';
+                        btn.style.transition = `all 0.3s ease ${idx * 0.1}s`;
+                        
+                        const canChoose = !choice.requires || gameState.inventory.includes(choice.requires);
+                        
+                        if (canChoose) {
+                            btn.onclick = (e) => {
+                                e.stopPropagation();
+                                handleChoice(npcId, choice);
+                            };
+                        } else {
+                            btn.style.opacity = '0.5';
+                            btn.textContent += ' (нужен предмет)';
+                            btn.style.cursor = 'not-allowed';
+                        }
+                        
+                        choicesDiv.appendChild(btn);
+                        
+                        setTimeout(() => {
+                            btn.style.opacity = '1';
+                            btn.style.transform = 'translateY(0)';
+                        }, 50);
+                    });
+                }
+            };
+            
+            const finishTyping = () => {
+                clearInterval(typeWriterInterval);
+                dialogueText.textContent = fullText;
+                skipHint.style.display = 'none';
+                showChoices();
+                dialogueBox.onclick = null;
+            };
+            
+            dialogueBox.onclick = finishTyping;
+            
+            typeWriterInterval = setInterval(() => {
+                if (charIndex < fullText.length) {
+                    dialogueText.textContent += fullText.charAt(charIndex);
+                    charIndex++;
+                } else {
+                    finishTyping();
+                }
+            }, 30);
             
             // Apply relationship changes
             if (node.relation) {
@@ -1608,6 +1964,11 @@
                     updateInventory();
                     showNotification(`Получено: ${effect.addItem}`);
                 }
+            }
+            
+            if (effect.vision) {
+                showNotification(`Видение: ${effect.vision}`);
+                triggerVision();
             }
             
             if (effect.quest) {
@@ -1711,15 +2072,19 @@
             gameStarted = true;
             document.getElementById('intro').classList.add('hidden');
             updateNPCStatus();
+            initAudio();
+            
+            const hintElem = document.getElementById('click-hint');
+            hintElem.textContent = 'Используйте клавиши A и D для осмотра. Кликните на персонажа для разговора.';
             
             // Show hint after a delay
             setTimeout(() => {
-                document.getElementById('click-hint').classList.add('visible');
+                hintElem.classList.add('visible');
             }, 2000);
             
             setTimeout(() => {
-                document.getElementById('click-hint').classList.remove('visible');
-            }, 8000);
+                hintElem.classList.remove('visible');
+            }, 10000);
         }
         
         // Initialize on load
