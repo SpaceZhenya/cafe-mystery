@@ -461,6 +461,7 @@
             inventory: [],
             cluesFound: 0,
             talkedTo: {},
+            talkedToCh2: {},
             day: 1,
             chapter: 1,
             ending: null,
@@ -2315,17 +2316,22 @@
             updateNPCStatus();
             
             // Chapter-aware dialogue
-            const tree = gameState.chapter === 2 && npcData[npcId].chapter2
+            const isCh2 = gameState.chapter === 2;
+            const tree = isCh2 && npcData[npcId].chapter2
                 ? npcData[npcId].chapter2
                 : npcData[npcId].dialogueTree;
             
-            const startNode = gameState.chapter === 2 ? 'intro_ch2' : 'intro';
+            const startNode = isCh2 ? 'intro_ch2' : 'intro';
             const node = tree[startNode] || tree.intro || Object.values(tree)[0];
             
             showDialogue(npcId, node);
             
             // Mark as talked to
-            gameState.talkedTo[npcId] = true;
+            if (isCh2) {
+                gameState.talkedToCh2[npcId] = true;
+            } else {
+                gameState.talkedTo[npcId] = true;
+            }
         }
         
         let typeWriterInterval;
@@ -2560,12 +2566,50 @@
         }
         
         function showFinalChoice() {
+            const hasCompass = gameState.inventory.includes('компас Элены');
+            const hasKeyM = gameState.inventory.includes('ключ Марко');
+            const hasBell = gameState.inventory.includes('серебряный колокольчик');
+            const hasAllItems = hasCompass && hasKeyM && hasBell;
+            
+            const talkedCh2 = gameState.talkedToCh2.elena && gameState.talkedToCh2.marco && gameState.talkedToCh2.nina;
+            
+            if (!talkedCh2) {
+                showNotification('Сфера не реагирует. Нужно узнать о ней больше от тех, кто здесь был.');
+                return;
+            }
+            
             const sphereChoice = document.getElementById('dialogue-box');
+            
+            if (!hasAllItems) {
+                sphereChoice.innerHTML = `
+                    <div class="speaker-name">✦ Сердце Коллекции ✦</div>
+                    <div class="dialogue-text">
+                        Перед вами пульсирующая золотая сфера. Она излучает мощную энергию, но её защита слишком сильна.
+                        <br><br>
+                        <em style="color:#8a847a">Вам нужно собрать три артефакта, чтобы получить доступ к силе сферы:</em>
+                        <br>
+                        ${hasCompass ? '✅' : '❌'} Компас Элены — чтобы видеть путь сквозь иллюзии
+                        <br>
+                        ${hasKeyM ? '✅' : '❌'} Ключ Марко — чтобы отпереть замки коллекции
+                        <br>
+                        ${hasBell ? '✅' : '❌'} Серебряный колокольчик Нины — чтобы усмирить духов
+                    </div>
+                    <div class="choices">
+                        <button class="choice-btn" onclick="endDialogue()">Продолжить поиски</button>
+                    </div>
+                `;
+                sphereChoice.classList.add('visible');
+                return;
+            }
+            
             sphereChoice.innerHTML = `
                 <div class="speaker-name">✦ Сердце Коллекции ✦</div>
                 <div class="dialogue-text">
-                    Перед вами пульсирующая золотая сфера. В ней — сила коллекции, души всех, кто был здесь до вас, 
-                    и ключ к разгадке тайны Маркуса. Сфера ждёт вашего решения...
+                    Три артефакта загораются в ваших руках. Защита сферы падает.
+                    Перед вами — пульсирующее сердце коллекции. В нём — сила сотен душ, 
+                    воспоминания Маркуса и ключ к разгадке тайны этого места.
+                    <br><br>
+                    <em style="color:#d4af37">Последний выбор. Он определит всё...</em>
                 </div>
                 <div class="choices">
                     <button class="choice-btn" onclick="window.finishGame('destroy')">💥 Разбить сферу — освободить все души</button>
@@ -2747,6 +2791,23 @@
         
         function showEnding() {
             if (gameState.chapter === 1) {
+                // Check requirements for basement access
+                const talkedToAll = gameState.talkedTo.elena && gameState.talkedTo.marco && gameState.talkedTo.nina;
+                const hasAmulet = gameState.inventory.includes('амулет защиты');
+                const hasKey = gameState.inventory.includes('ключ');
+                
+                if (!talkedToAll) {
+                    showNotification('Нужно поговорить со всеми посетителями кафе, прежде чем спускаться в подвал.');
+                    return;
+                }
+                if (!hasAmulet) {
+                    showNotification('Без защиты Нины в подвал лучше не соваться. Добудьте амулет.');
+                    return;
+                }
+                if (!hasKey) {
+                    showNotification('Дверь в подвал заперта. Нужен ключ.');
+                    return;
+                }
                 transitionToChapter2();
             }
         }
