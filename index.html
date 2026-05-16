@@ -1545,17 +1545,8 @@
         }
         
         function createRoom() {
-            // Floor - wooden
-            const floorGeo = new THREE.PlaneGeometry(24, 24);
-            const floorMat = new THREE.MeshStandardMaterial({
-                color: 0x2a1f15,
-                roughness: 0.9,
-                metalness: 0.1
-            });
-            const floor = new THREE.Mesh(floorGeo, floorMat);
-            floor.rotation.x = -Math.PI / 2;
-            floor.receiveShadow = true;
-            scene.add(floor);
+            // Floor with plank texture
+            createFloorWithPlanks();
             
             // Cozy Rug
             const rugGeo = new THREE.PlaneGeometry(7, 5);
@@ -1648,6 +1639,10 @@
                 scene.add(beam);
             }
             
+            // Architecture details
+            createBaseboards();
+            createEntranceDoor();
+            
             // Furniture - Tables
             createTable(-2, 1, 0);
             createTable(2, 1, 0);
@@ -1662,14 +1657,22 @@
             bar.castShadow = true;
             scene.add(bar);
             
+            // Bar stools
+            createBarStools();
+            
             // Shelves with bottles
             createShelves();
             
             // Chandelier
             createChandelier();
             
-            // Decorative items
+            // Decorative items and details
             createDecorations();
+            createFireplace();
+            createWallSconces();
+            createTableCandles();
+            createCurtains();
+            createCoatRack();
         }
         
         function createTable(x, y, z) {
@@ -1878,7 +1881,308 @@
                 scene.add(leaf);
             }
         }
-        
+
+        // ===== Realism improvements =====
+        function createCanvasTexture(width, height, drawFunc) {
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            drawFunc(ctx, width, height);
+            const tex = new THREE.CanvasTexture(canvas);
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            return tex;
+        }
+
+        function createFloorWithPlanks() {
+            // Remove old floor if exists (from previous implementations)
+            const oldFloors = scene.children.filter(c => 
+                c.isMesh && c.material && c.material.color && 
+                c.material.color.getHex() === 0x2a1f15 && 
+                c.geometry.type === 'PlaneGeometry' && 
+                Math.abs(c.position.y) < 0.1
+            );
+            oldFloors.forEach(f => scene.remove(f));
+
+            const plankTex = createCanvasTexture(512, 512, (ctx, w, h) => {
+                ctx.fillStyle = '#2a1f15';
+                ctx.fillRect(0, 0, w, h);
+                // Plank lines
+                ctx.strokeStyle = '#1a0f08';
+                ctx.lineWidth = 2;
+                const plankH = h / 12;
+                for (let y = 0; y < h; y += plankH) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(w, y);
+                    ctx.stroke();
+                    // Random plank end joints
+                    for (let x = 0; x < w; x += 60 + Math.random() * 80) {
+                        ctx.beginPath();
+                        ctx.moveTo(x, y);
+                        ctx.lineTo(x, y + plankH);
+                        ctx.stroke();
+                    }
+                }
+                // Wood grain
+                ctx.strokeStyle = 'rgba(60, 40, 20, 0.15)';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 30; i++) {
+                    const y = Math.random() * h;
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    for (let x = 0; x < w; x += 20) {
+                        ctx.lineTo(x, y + Math.sin(x * 0.05 + i) * 2);
+                    }
+                    ctx.stroke();
+                }
+            });
+            plankTex.repeat.set(4, 4);
+
+            const floor = new THREE.Mesh(
+                new THREE.PlaneGeometry(24, 24),
+                new THREE.MeshStandardMaterial({ map: plankTex, roughness: 0.8, metalness: 0.05 })
+            );
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+        }
+
+        function createBaseboards() {
+            const bbMat = new THREE.MeshStandardMaterial({ color: 0x1a120a, roughness: 0.9 });
+            const h = 0.15, d = 0.08;
+            const walls = [
+                { x: 0, z: -5 + d/2, sx: 12, sz: d },    // back
+                { x: 0, z: 9 - d/2, sx: 12, sz: d },      // front
+                { x: -6 + d/2, z: 2, sx: d, sz: 14 },     // left
+                { x: 6 - d/2, z: 2, sx: d, sz: 14 }       // right
+            ];
+            walls.forEach(w => {
+                const bb = new THREE.Mesh(new THREE.BoxGeometry(w.sx, h, w.sz), bbMat);
+                bb.position.set(w.x, h/2, w.z);
+                scene.add(bb);
+            });
+        }
+
+        function createEntranceDoor() {
+            const doorMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.7, metalness: 0.1 });
+            const frameMat = new THREE.MeshStandardMaterial({ color: 0x1a1008, roughness: 0.9 });
+            
+            // Door frame
+            const frameParts = [
+                { sx: 0.1, sy: 2.5, sz: 0.1, x: 0, y: 1.25, z: 8.95 }, // left
+                { sx: 0.1, sy: 2.5, sz: 0.1, x: 1.2, y: 1.25, z: 8.95 }, // right
+                { sx: 1.3, sy: 0.1, sz: 0.1, x: 0.6, y: 2.55, z: 8.95 } // top
+            ];
+            frameParts.forEach(p => {
+                const m = new THREE.Mesh(new THREE.BoxGeometry(p.sx, p.sy, p.sz), frameMat);
+                m.position.set(p.x, p.y, p.z);
+                scene.add(m);
+            });
+            
+            // Door panel
+            const door = new THREE.Mesh(
+                new THREE.BoxGeometry(1.1, 2.3, 0.05),
+                doorMat
+            );
+            door.position.set(0.6, 1.15, 8.92);
+            scene.add(door);
+            
+            // Door handle
+            const handleMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.8, roughness: 0.2 });
+            const handle = new THREE.Mesh(new THREE.SphereGeometry(0.04, 8, 8), handleMat);
+            handle.position.set(1.0, 1.1, 8.92);
+            scene.add(handle);
+            
+            // Doorstep
+            const step = new THREE.Mesh(
+                new THREE.BoxGeometry(1.5, 0.05, 0.3),
+                new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.9 })
+            );
+            step.position.set(0.6, 0.025, 9.1);
+            scene.add(step);
+        }
+
+        function createFireplace() {
+            const brickMat = new THREE.MeshStandardMaterial({ color: 0x5a3020, roughness: 0.95 });
+            const mantelMat = new THREE.MeshStandardMaterial({ color: 0x3a2010, roughness: 0.7 });
+            
+            // Main body
+            const body = new THREE.Mesh(new THREE.BoxGeometry(1.6, 1.8, 0.6), brickMat);
+            body.position.set(4.5, 0.9, 2.2);
+            scene.add(body);
+            
+            // Fireplace opening (darker inset)
+            const inside = new THREE.Mesh(
+                new THREE.BoxGeometry(0.8, 1.0, 0.4),
+                new THREE.MeshStandardMaterial({ color: 0x0a0505, roughness: 1.0 })
+            );
+            inside.position.set(4.5, 0.7, 2.5);
+            scene.add(inside);
+            
+            // Mantel
+            const mantel = new THREE.Mesh(
+                new THREE.BoxGeometry(1.8, 0.1, 0.5),
+                mantelMat
+            );
+            mantel.position.set(4.5, 1.8, 2.2);
+            scene.add(mantel);
+            
+            // Fire glow light
+            const fireLight = new THREE.PointLight(0xff6600, 2.0, 5);
+            fireLight.position.set(4.5, 0.5, 2.4);
+            fireLight.userData.isFireLight = true;
+            scene.add(fireLight);
+            
+            // Fire particles (small glowing sprites)
+            const fireCanvas = document.createElement('canvas');
+            fireCanvas.width = 32;
+            fireCanvas.height = 32;
+            const fCtx = fireCanvas.getContext('2d');
+            const grad = fCtx.createRadialGradient(16, 16, 0, 16, 16, 16);
+            grad.addColorStop(0, 'rgba(255, 150, 50, 0.6)');
+            grad.addColorStop(0.5, 'rgba(255, 80, 0, 0.3)');
+            grad.addColorStop(1, 'rgba(255, 0, 0, 0)');
+            fCtx.fillStyle = grad;
+            fCtx.fillRect(0, 0, 32, 32);
+            const fireTex = new THREE.CanvasTexture(fireCanvas);
+            
+            for (let i = 0; i < 8; i++) {
+                const sprite = new THREE.Sprite(
+                    new THREE.SpriteMaterial({ map: fireTex, transparent: true, blending: THREE.AdditiveBlending })
+                );
+                sprite.position.set(
+                    4.3 + Math.random() * 0.4,
+                    0.2 + Math.random() * 0.5,
+                    2.4
+                );
+                sprite.scale.set(0.2, 0.3, 1);
+                sprite.userData = { isFire: true, phase: Math.random() * 10, baseY: sprite.position.y };
+                scene.add(sprite);
+            }
+        }
+
+        function createWallSconces() {
+            const sconceMat = new THREE.MeshStandardMaterial({ color: 0x8b6914, metalness: 0.6, roughness: 0.4 });
+            const positions = [
+                { x: -5.8, z: -1, ry: Math.PI / 2 },
+                { x: -5.8, z: 3, ry: Math.PI / 2 },
+                { x: 5.8, z: -1, ry: -Math.PI / 2 },
+                { x: 5.8, z: 3, ry: -Math.PI / 2 },
+            ];
+            positions.forEach(p => {
+                const base = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.06, 0.1, 8), sconceMat);
+                base.position.set(p.x, 2.2, p.z);
+                base.rotation.y = p.ry;
+                scene.add(base);
+                
+                const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.015, 0.015, 0.15, 6), sconceMat);
+                arm.position.set(p.x + Math.sin(p.ry) * 0.08, 2.25, p.z + Math.cos(p.ry) * 0.08);
+                arm.rotation.z = Math.PI / 4;
+                scene.add(arm);
+                
+                const bulb = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.03, 6, 6),
+                    new THREE.MeshStandardMaterial({ color: 0xffcc66, emissive: 0xffaa44, emissiveIntensity: 0.8 })
+                );
+                bulb.position.set(p.x + Math.sin(p.ry) * 0.15, 2.15, p.z + Math.cos(p.ry) * 0.15);
+                scene.add(bulb);
+                
+                const sconceLight = new THREE.PointLight(0xffaa66, 0.8, 4);
+                sconceLight.position.copy(bulb.position);
+                scene.add(sconceLight);
+            });
+        }
+
+        function createTableCandles() {
+            const tables = [[-2, 1], [2, 1], [0, 2], [0, -2]];
+            tables.forEach(([x, z]) => {
+                const candleMat = new THREE.MeshStandardMaterial({ color: 0xf5e6c8, roughness: 0.9 });
+                const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.025, 0.08, 8), candleMat);
+                candle.position.set(x + 0.2, 0.8, z + 0.2);
+                scene.add(candle);
+                
+                const flameMat = new THREE.MeshStandardMaterial({ color: 0xffaa44, emissive: 0xff8800, emissiveIntensity: 1.0 });
+                const flame = new THREE.Mesh(new THREE.SphereGeometry(0.015, 6, 6), flameMat);
+                flame.position.set(x + 0.2, 0.85, z + 0.2);
+                flame.userData = { isFlame: true, phase: Math.random() * 10, baseY: 0.85 };
+                scene.add(flame);
+                
+                // Subtle light from each candle
+                const candleLight = new THREE.PointLight(0xff8844, 0.4, 2);
+                candleLight.position.set(x + 0.2, 0.85, z + 0.2);
+                scene.add(candleLight);
+            });
+        }
+
+        function createCurtains() {
+            const curtainMat = new THREE.MeshStandardMaterial({
+                color: 0x3a1520,
+                roughness: 0.9,
+                side: THREE.DoubleSide
+            });
+            
+            // Left curtain (on left wall, over the window)
+            const leftCurtain = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 3.5), curtainMat);
+            leftCurtain.position.set(-6.8, 3, 0);
+            leftCurtain.rotation.y = Math.PI / 2;
+            scene.add(leftCurtain);
+            
+            const rightCurtain = new THREE.Mesh(new THREE.PlaneGeometry(0.8, 3.5), curtainMat);
+            rightCurtain.position.set(-5.0, 3, 0);
+            rightCurtain.rotation.y = Math.PI / 2;
+            scene.add(rightCurtain);
+            
+            // Curtain rod
+            const rodMat = new THREE.MeshStandardMaterial({ color: 0x2a1f15, metalness: 0.5 });
+            const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 2, 6), rodMat);
+            rod.rotation.z = Math.PI / 2;
+            rod.position.set(-5.9, 4.2, 0);
+            scene.add(rod);
+        }
+
+        function createBarStools() {
+            const stoolMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.8 });
+            const positions = [-2, -1, 1, 2];
+            positions.forEach(x => {
+                const seat = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.3, 0.05, 12), stoolMat);
+                seat.position.set(x, 0.75, -3.2);
+                scene.add(seat);
+                
+                const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.75, 6), stoolMat);
+                leg.position.set(x, 0.375, -3.2);
+                scene.add(leg);
+                
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.02, 6, 12), stoolMat);
+                ring.position.set(x, 0.35, -3.2);
+                ring.rotation.x = Math.PI / 2;
+                scene.add(ring);
+            });
+        }
+
+        function createCoatRack() {
+            const poleMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.7 });
+            // Pole
+            const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.03, 0.05, 1.8, 8), poleMat);
+            pole.position.set(-4.5, 0.9, 8);
+            scene.add(pole);
+            // Base
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 0.05, 12), poleMat);
+            base.position.set(-4.5, 0.025, 8);
+            scene.add(base);
+            // Hooks
+            for (let i = 0; i < 4; i++) {
+                const hook = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.015, 0.015, 0.12, 4),
+                    new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6 })
+                );
+                hook.position.set(-4.5 + Math.cos(i * Math.PI/2) * 0.08, 1.7, 8 + Math.sin(i * Math.PI/2) * 0.08);
+                hook.rotation.x = Math.PI / 3;
+                hook.rotation.z = i * Math.PI / 2;
+                scene.add(hook);
+            }
+        }
+
         function createNPCs() {
             Object.keys(npcData).forEach(key => {
                 const data = npcData[key];
@@ -1905,162 +2209,419 @@
             });
         }
         
-        function createHumanoid(skinColor, position) {
+        function createHumanoid(skinColor, position, npcId) {
             const group = new THREE.Group();
             
-            // Body
+            // Skin material with slight subsurface look
             const bodyMat = new THREE.MeshStandardMaterial({ 
                 color: skinColor, 
-                roughness: 0.8,
-                metalness: 0.1
+                roughness: 0.6,
+                metalness: 0.0,
+                emissive: skinColor,
+                emissiveIntensity: 0.02
             });
             
-            const clothMat = new THREE.MeshStandardMaterial({ 
-                color: 0x1a1510, 
-                roughness: 0.9 
-            });
+            // NPC-specific appearance
+            const isElena = npcId === 'elena';
+            const isMarco = npcId === 'marco';
+            const isNina = npcId === 'nina';
             
-            // Head
+            // Clothing colors per NPC
+            const clothColor = isElena ? 0x2a1a30 : isMarco ? 0x1a1a1a : 0x3a2a20;
+            const clothMat = new THREE.MeshStandardMaterial({ color: clothColor, roughness: 0.8 });
+            const lightClothMat = isMarco ? new THREE.MeshStandardMaterial({ color: 0x2a2a2a, roughness: 0.7 }) : clothMat;
+            
+            // Hair colors per NPC
+            const hairColor = isElena ? 0x1a0a05 : isMarco ? 0x3a3025 : 0x4a3020;
+            const hairMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.9 });
+            
+            // Neck
+            const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.08, 10), bodyMat);
+            neck.position.y = 1.45;
+            group.add(neck);
+            
+            // Head (slightly oval, more natural)
             const head = new THREE.Mesh(
-                new THREE.SphereGeometry(0.2, 16, 16),
+                new THREE.SphereGeometry(0.18, 20, 18),
                 bodyMat
             );
-            head.position.y = 1.6;
+            head.scale.set(1.0, 1.15, 0.95);
+            head.position.y = 1.55;
             head.castShadow = true;
             group.add(head);
             
-            // Face features
-            // Eyes
-            const eyeMat = new THREE.MeshStandardMaterial({ color: 0x2a2015 });
-            const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-            
-            const leftEye = new THREE.Mesh(
-                new THREE.SphereGeometry(0.04, 8, 8),
-                eyeWhiteMat
+            // Jaw/chin detail
+            const jaw = new THREE.Mesh(
+                new THREE.SphereGeometry(0.13, 12, 10, 0, Math.PI * 2, 0, Math.PI * 0.5),
+                bodyMat
             );
-            leftEye.position.set(-0.08, 1.65, 0.15);
-            group.add(leftEye);
+            jaw.scale.set(1.0, 0.5, 0.9);
+            jaw.position.set(0, 1.38, 0.05);
+            group.add(jaw);
             
-            const rightEye = new THREE.Mesh(
-                new THREE.SphereGeometry(0.04, 8, 8),
-                eyeWhiteMat
-            );
-            rightEye.position.set(0.08, 1.65, 0.15);
-            group.add(rightEye);
+            // ---- EYES ----
+            const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf5f0e8, roughness: 0.1 });
+            const pupilMat = new THREE.MeshStandardMaterial({ color: 0x1a0a00, roughness: 0.1 });
+            const irisMat = new THREE.MeshStandardMaterial({ 
+                color: isElena ? 0x5a3a20 : (isMarco ? 0x2a3a2a : 0x3a5a6a), 
+                roughness: 0.3 
+            });
             
-            // Pupils
-            const pupilMat = new THREE.MeshStandardMaterial({ color: 0x1a0a00 });
-            const leftPupil = new THREE.Mesh(
-                new THREE.SphereGeometry(0.02, 8, 8),
-                pupilMat
-            );
-            leftPupil.position.set(-0.08, 1.65, 0.17);
-            group.add(leftPupil);
+            // Eye sockets (subtle shadow)
+            const socketMat = new THREE.MeshStandardMaterial({ color: 0x3a2a20, roughness: 1.0 });
+            [-1, 1].forEach(side => {
+                const socket = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), socketMat);
+                socket.position.set(side * 0.075, 1.58, 0.14);
+                socket.scale.set(1, 0.6, 0.4);
+                group.add(socket);
+                
+                // Eyeball
+                const eyeWhite = new THREE.Mesh(new THREE.SphereGeometry(0.04, 10, 10), eyeWhiteMat);
+                eyeWhite.position.set(side * 0.075, 1.58, 0.16);
+                group.add(eyeWhite);
+                
+                // Iris
+                const iris = new THREE.Mesh(new THREE.SphereGeometry(0.022, 10, 10), irisMat);
+                iris.position.set(side * 0.075, 1.58, 0.18);
+                group.add(iris);
+                
+                // Pupil
+                const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.01, 8, 8), pupilMat);
+                pupil.position.set(side * 0.075, 1.58, 0.185);
+                group.add(pupil);
+                
+                // Upper eyelid
+                const lidMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.7 });
+                const lid = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8, 0, Math.PI * 2, 0, Math.PI * 0.4), lidMat);
+                lid.position.set(side * 0.075, 1.605, 0.16);
+                lid.scale.set(1.1, 0.8, 0.8);
+                lid.userData.isEyelid = true;
+                lid.userData.originalScaleY = 0.8;
+                group.add(lid);
+            });
             
-            const rightPupil = new THREE.Mesh(
-                new THREE.SphereGeometry(0.02, 8, 8),
-                pupilMat
-            );
-            rightPupil.position.set(0.08, 1.65, 0.17);
-            group.add(rightPupil);
+            // ---- NOSE ----
+            const noseMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.6 });
+            const nose = new THREE.Mesh(new THREE.SphereGeometry(0.035, 8, 8), noseMat);
+            nose.position.set(0, 1.52, 0.17);
+            nose.scale.set(0.6, 0.8, 0.5);
+            group.add(nose);
             
-            // Hair
-            const hairMat = new THREE.MeshStandardMaterial({ 
-                color: 0x2a1a10, 
+            // Nostrils
+            const nostrilMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 1.0 });
+            [-0.015, 0.015].forEach(side => {
+                const nostril = new THREE.Mesh(new THREE.SphereGeometry(0.008, 6, 6), nostrilMat);
+                nostril.position.set(side, 1.48, 0.18);
+                group.add(nostril);
+            });
+            
+            // ---- MOUTH ----
+            const mouthMat = new THREE.MeshStandardMaterial({ color: 0x3a1a10, roughness: 0.5 });
+            const mouth = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.015, 0.03), mouthMat);
+            mouth.position.set(0, 1.42, 0.16);
+            group.add(mouth);
+            
+            // Lower lip
+            const lipMat = new THREE.MeshStandardMaterial({ color: 0x4a2a1a, roughness: 0.5 });
+            const lip = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.01, 0.02), lipMat);
+            lip.position.set(0, 1.40, 0.16);
+            group.add(lip);
+            
+            // ---- EYEBROWS ----
+            const browMat = new THREE.MeshStandardMaterial({ color: hairColor, roughness: 0.9 });
+            [-1, 1].forEach(side => {
+                const brow = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.008, 0.01), browMat);
+                brow.position.set(side * 0.075, 1.63, 0.16);
+                brow.rotation.x = -0.2;
+                group.add(brow);
+            });
+            
+            // ---- EARS ----
+            const earMat = new THREE.MeshStandardMaterial({ color: skinColor, roughness: 0.7 });
+            [-1, 1].forEach(side => {
+                const ear = new THREE.Mesh(new THREE.SphereGeometry(0.03, 8, 8), earMat);
+                ear.position.set(side * 0.18, 1.53, 0);
+                ear.scale.set(0.3, 0.8, 0.5);
+                group.add(ear);
+            });
+            
+            // ---- HAIR ----
+            if (isElena) {
+                // Long elegant hair with waves
+                const hairTop = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.19, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.5),
+                    hairMat
+                );
+                hairTop.position.y = 1.62;
+                hairTop.scale.set(1.0, 0.9, 1.0);
+                group.add(hairTop);
+                
+                // Long flowing hair down the back
+                for (let i = -3; i <= 3; i++) {
+                    const strand = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.025, 0.035, 0.5, 6),
+                        hairMat
+                    );
+                    strand.position.set(i * 0.035, 1.1, -0.1);
+                    strand.rotation.z = i * 0.03;
+                    strand.rotation.x = 0.15;
+                    group.add(strand);
+                }
+                
+                // Side strands
+                for (let i = -1; i <= 1; i += 2) {
+                    const side = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.02, 0.03, 0.3, 6),
+                        hairMat
+                    );
+                    side.position.set(i * 0.15, 1.3, 0.05);
+                    side.rotation.z = i * 0.2;
+                    side.rotation.x = 0.1;
+                    group.add(side);
+                }
+                
+                // Hair bun at back
+                const bun = new THREE.Mesh(new THREE.SphereGeometry(0.07, 10, 10), hairMat);
+                bun.position.set(0, 1.7, -0.12);
+                bun.scale.set(1.0, 0.7, 0.8);
+                group.add(bun);
+                
+            } else if (isMarco) {
+                // Short receding hair (bartender style)
+                const hairTop = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.19, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.4),
+                    hairMat
+                );
+                hairTop.position.y = 1.64;
+                hairTop.scale.set(1.0, 0.7, 1.0);
+                group.add(hairTop);
+                
+                // Sides
+                const sideMat = new THREE.MeshStandardMaterial({ color: 0x3a3025, roughness: 0.9 });
+                [-1, 1].forEach(side => {
+                    const sideHair = new THREE.Mesh(new THREE.SphereGeometry(0.05, 8, 8), sideMat);
+                    sideHair.position.set(side * 0.13, 1.55, -0.02);
+                    sideHair.scale.set(1.0, 0.5, 0.6);
+                    group.add(sideHair);
+                });
+                
+            } else {
+                // Medium hair in a ponytail (Nina)
+                const hairTop = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.19, 14, 10, 0, Math.PI * 2, 0, Math.PI * 0.5),
+                    hairMat
+                );
+                hairTop.position.y = 1.63;
+                hairTop.scale.set(1.0, 0.85, 1.0);
+                group.add(hairTop);
+                
+                // Ponytail
+                const tail = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.03, 0.05, 0.3, 8),
+                    hairMat
+                );
+                tail.position.set(0, 1.3, -0.15);
+                tail.rotation.x = -0.1;
+                group.add(tail);
+                
+                const tailEnd = new THREE.Mesh(new THREE.SphereGeometry(0.045, 8, 8), hairMat);
+                tailEnd.position.set(0, 1.15, -0.17);
+                group.add(tailEnd);
+            }
+            
+            // ---- TORSO ----
+            const shoulderW = isMarco ? 0.25 : 0.2;
+            const torsoWidth = isMarco ? 0.22 : 0.18;
+            
+            // Upper torso / chest
+            const chestMat = isElena ? new THREE.MeshStandardMaterial({ color: 0x2a1a30, roughness: 0.7 })
+                       : isMarco ? new THREE.MeshStandardMaterial({ color: 0xf0ece0, roughness: 0.6 })
+                       : clothMat;
+            
+            const chest = new THREE.Mesh(new THREE.CylinderGeometry(shoulderW, torsoWidth, 0.2, 10), chestMat);
+            chest.position.y = 1.25;
+            chest.castShadow = true;
+            group.add(chest);
+            
+            // Mid torso
+            const midTorso = new THREE.Mesh(new THREE.CylinderGeometry(torsoWidth, torsoWidth * 0.9, 0.25, 10), clothMat);
+            midTorso.position.y = 1.05;
+            group.add(midTorso);
+            
+            // Lower torso / hips
+            const hipMat = isElena ? new THREE.MeshStandardMaterial({ color: 0x2a1a30, roughness: 0.7 }) : clothMat;
+            const hips = new THREE.Mesh(new THREE.CylinderGeometry(torsoWidth * 0.9, torsoWidth * 1.1, 0.15, 10), hipMat);
+            hips.position.y = 0.85;
+            group.add(hips);
+            
+            // Collar detail (for Marco's shirt)
+            if (isMarco) {
+                const collarMat = new THREE.MeshStandardMaterial({ color: 0xf0ece0, roughness: 0.5 });
+                const collar = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.02, 0.06), collarMat);
+                collar.position.set(0, 1.35, 0.1);
+                group.add(collar);
+                
+                // Vest outline
+                const vestMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
+                const vest = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.3, 0.02), vestMat);
+                vest.position.set(0, 1.15, 0.14);
+                group.add(vest);
+                
+                // Buttons
+                const btnMat = new THREE.MeshStandardMaterial({ color: 0xd4af37, metalness: 0.6 });
+                [1.2, 1.1, 1.0].forEach(y => {
+                    const btn = new THREE.Mesh(new THREE.SphereGeometry(0.01, 6, 6), btnMat);
+                    btn.position.set(0, y, 0.15);
+                    group.add(btn);
+                });
+            }
+            
+            // Elena's dress detail (collar)
+            if (isElena) {
+                const dressMat = new THREE.MeshStandardMaterial({ color: 0x3a2050, roughness: 0.6 });
+                const collar = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.015, 0.06), dressMat);
+                collar.position.set(0, 1.35, 0.08);
+                collar.rotation.x = 0.2;
+                group.add(collar);
+            }
+            
+            // ---- ARMS with unique poses ----
+            const upperArmLen = isMarco ? 0.35 : 0.3;
+            const armWidth = isMarco ? 0.06 : 0.05;
+            const armGeo = new THREE.CylinderGeometry(armWidth, armWidth * 0.8, upperArmLen, 7);
+            
+            [-1, 1].forEach(side => {
+                const isRight = side === 1;
+                
+                // Upper arm
+                const upperArm = new THREE.Mesh(armGeo, clothMat);
+                upperArm.position.set(side * shoulderW, 1.1, 0);
+                
+                if (isElena) {
+                    // Elena: elegant, arms slightly back and in
+                    upperArm.rotation.z = side * 0.2;
+                    upperArm.rotation.x = -side * 0.25;
+                } else if (isMarco) {
+                    // Marco: arms at sides, ready to cross
+                    upperArm.rotation.z = side * 0.15;
+                    upperArm.rotation.x = -side * 0.05;
+                } else {
+                    // Nina: arms close to body, hands in pockets
+                    upperArm.rotation.z = side * 0.4;
+                    upperArm.rotation.x = 0.3;
+                }
+                group.add(upperArm);
+                
+                // Forearm
+                const forearmGeo = new THREE.CylinderGeometry(armWidth * 0.7, armWidth * 0.65, 0.25, 7);
+                const forearm = new THREE.Mesh(forearmGeo, clothMat);
+                
+                if (isElena) {
+                    // Elena: hands clasped together in front
+                    forearm.position.set(side * (shoulderW - 0.02), 0.85, 0.12);
+                    forearm.rotation.z = -side * 0.35;
+                    forearm.rotation.x = -0.1;
+                } else if (isMarco) {
+                    // Marco: arms crossed over chest
+                    forearm.position.set(-side * 0.06, 1.18, 0.06);
+                    forearm.rotation.z = Math.PI / 2 + side * 0.15;
+                    forearm.rotation.x = 0.15;
+                } else {
+                    // Nina: hands in pockets / arms relaxed
+                    forearm.position.set(side * (shoulderW - 0.01), 0.75, 0.1);
+                    forearm.rotation.z = -side * 0.1;
+                    forearm.rotation.x = -0.4;
+                }
+                group.add(forearm);
+                
+                // Hand
+                const hand = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.045, 7, 7),
+                    bodyMat
+                );
+                
+                if (isElena) {
+                    // Hands meet at center
+                    hand.position.set(0, 0.75, 0.18);
+                    hand.scale.set(0.8, 0.7, 0.6);
+                } else if (isMarco) {
+                    // Hands rest on opposite upper arms
+                    hand.position.set(-side * 0.08, 1.22, 0.08);
+                    hand.scale.set(0.8, 0.7, 0.6);
+                } else {
+                    // Hands at hip level (pockets)
+                    hand.position.set(side * 0.06, 0.62, 0.15);
+                    hand.scale.set(0.8, 0.7, 0.6);
+                }
+                group.add(hand);
+                
+                // Fingers (simplified for each pose)
+                if (isMarco) {
+                    // Marco: no visible fingers (crossed arms cover them)
+                } else {
+                    for (let f = -1; f <= 1; f++) {
+                        const finger = new THREE.Mesh(
+                            new THREE.SphereGeometry(0.012, 5, 5),
+                            bodyMat
+                        );
+                        if (isElena) {
+                            finger.position.set(f * 0.008, 0.73 + f * 0.012, 0.22 + f * 0.008);
+                        } else {
+                            finger.position.set(
+                                side * 0.08 + f * 0.005, 
+                                0.59 + f * 0.015, 
+                                0.18 + f * 0.01
+                            );
+                        }
+                        finger.scale.set(0.8, 0.6, 0.4);
+                        group.add(finger);
+                    }
+                }
+            });
+            
+            // ---- LEGS ----
+            const legMat = new THREE.MeshStandardMaterial({ 
+                color: isElena ? 0x1a1020 : 0x151010, 
                 roughness: 0.9 
             });
             
-            // Different hair for different NPCs
-            const hairStyle = Math.floor(Math.random() * 3);
-            
-            if (hairStyle === 0) {
-                // Short hair
-                const hair = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.22, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-                    hairMat
+            [-1, 1].forEach(side => {
+                // Upper leg
+                const upperLeg = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.07, 0.075, 0.3, 8),
+                    legMat
                 );
-                hair.position.y = 1.7;
-                group.add(hair);
-            } else if (hairStyle === 1) {
-                // Medium hair
-                const hairTop = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.22, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-                    hairMat
-                );
-                hairTop.position.y = 1.72;
-                group.add(hairTop);
+                upperLeg.position.set(side * 0.08, 0.55, 0);
+                group.add(upperLeg);
                 
-                const hairSide = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.08, 0.08, 0.3, 8),
-                    hairMat
+                // Lower leg
+                const lowerLeg = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.06, 0.055, 0.3, 8),
+                    isElena ? new THREE.MeshStandardMaterial({ color: 0x1a1020, roughness: 0.9 }) : legMat
                 );
-                hairSide.position.set(0, 1.4, -0.1);
-                group.add(hairSide);
-            } else {
-                // Long hair
-                const hairTop = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.23, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2),
-                    hairMat
-                );
-                hairTop.position.y = 1.72;
-                group.add(hairTop);
+                lowerLeg.position.set(side * 0.08, 0.25, 0);
+                group.add(lowerLeg);
                 
-                for (let i = -1; i <= 1; i++) {
-                    const strand = new THREE.Mesh(
-                        new THREE.CylinderGeometry(0.05, 0.05, 0.4, 8),
-                        hairMat
-                    );
-                    strand.position.set(i * 0.1, 1.2, -0.15);
-                    group.add(strand);
-                }
-            }
+                // Foot
+                const foot = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.06, 0.04, 0.1),
+                    isElena ? new THREE.MeshStandardMaterial({ color: 0x1a0a10, roughness: 0.8 }) 
+                            : new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.9 })
+                );
+                foot.position.set(side * 0.08, 0.02, 0.04);
+                group.add(foot);
+            });
             
-            // Torso
-            const torso = new THREE.Mesh(
-                new THREE.CylinderGeometry(0.18, 0.22, 0.5, 8),
-                clothMat
-            );
-            torso.position.y = 1.05;
-            torso.castShadow = true;
-            group.add(torso);
+            // ---- SHOULDERS (epaulettes) ----
+            const shoulderMat = new THREE.MeshStandardMaterial({ color: 0x1a1510, roughness: 0.8 });
+            [-1, 1].forEach(side => {
+                const pad = new THREE.Mesh(new THREE.SphereGeometry(0.06, 7, 7), shoulderMat);
+                pad.position.set(side * (shoulderW + 0.05), 1.35, 0);
+                pad.scale.set(1.2, 0.5, 0.8);
+                group.add(pad);
+            });
             
-            // Arms
-            const armGeo = new THREE.CylinderGeometry(0.055, 0.065, 0.4, 8);
-            
-            const leftArm = new THREE.Mesh(armGeo, clothMat);
-            leftArm.position.set(-0.3, 1.0, 0);
-            leftArm.rotation.z = 0.2;
-            group.add(leftArm);
-            
-            const rightArm = new THREE.Mesh(armGeo.clone(), clothMat);
-            rightArm.position.set(0.3, 1.0, 0);
-            rightArm.rotation.z = -0.2;
-            group.add(rightArm);
-            
-            // Hands
-            const handGeo = new THREE.SphereGeometry(0.06, 8, 8);
-            
-            const leftHand = new THREE.Mesh(handGeo, bodyMat);
-            leftHand.position.set(-0.38, 0.7, 0);
-            group.add(leftHand);
-            
-            const rightHand = new THREE.Mesh(handGeo, bodyMat);
-            rightHand.position.set(0.38, 0.7, 0);
-            group.add(rightHand);
-            
-            // Legs
-            const legGeo = new THREE.CylinderGeometry(0.07, 0.09, 0.5, 8);
-            const legMat = new THREE.MeshStandardMaterial({ color: 0x151010, roughness: 0.9 });
-            
-            const leftLeg = new THREE.Mesh(legGeo, legMat);
-            leftLeg.position.set(-0.1, 0.35, 0);
-            group.add(leftLeg);
-            
-            const rightLeg = new THREE.Mesh(legGeo, legMat);
-            rightLeg.position.set(0.1, 0.35, 0);
-            group.add(rightLeg);
-            
-            // Lower the whole character so the feet are exactly on the floor (y=0.1 -> y=0)
+            // Position the character
             group.position.set(position.x, position.y - 0.1, position.z);
             
             return group;
@@ -2251,6 +2812,38 @@
                 if (head) {
                     head.rotation.y = Math.sin(time * 0.3 + index) * 0.1;
                 }
+                
+                // Blinking animation
+                if (!npc.userData.blinkTimer) npc.userData.blinkTimer = 3 + Math.random() * 5;
+                if (!npc.userData.isBlinking) {
+                    npc.userData.blinkTimer -= delta;
+                    if (npc.userData.blinkTimer <= 0) {
+                        npc.userData.isBlinking = true;
+                        npc.userData.blinkPhase = 0;
+                    }
+                }
+                if (npc.userData.isBlinking) {
+                    npc.userData.blinkPhase += delta * 10;
+                    const t = npc.userData.blinkPhase;
+                    let lidScaleY;
+                    if (t < 0.1) {
+                        lidScaleY = 0.8 - (0.8 / 0.1) * t;
+                    } else if (t < 0.2) {
+                        lidScaleY = 0;
+                    } else if (t < 0.3) {
+                        lidScaleY = (0.8 / 0.1) * (t - 0.2);
+                    } else {
+                        lidScaleY = 0.8;
+                        npc.userData.isBlinking = false;
+                        npc.userData.blinkTimer = 3 + Math.random() * 5;
+                    }
+                    npc.children.forEach(child => {
+                        if (child.userData && child.userData.isEyelid) {
+                            child.scale.y = lidScaleY;
+                            if (lidScaleY < 0.15) child.scale.y = 0.01;
+                        }
+                    });
+                }
             });
             
             // Animate dynamic elements
@@ -2271,7 +2864,7 @@
                 if (child.userData && child.userData.isRain) {
                     const positions = child.geometry.attributes.position.array;
                     for (let i = 0; i < positions.length; i += 3) {
-                        positions[i + 1] -= delta * 6; // fall speed
+                        positions[i + 1] -= delta * 6;
                         if (positions[i + 1] < 0) positions[i + 1] = 6;
                     }
                     child.geometry.attributes.position.needsUpdate = true;
@@ -2283,6 +2876,25 @@
                     } else {
                         child.intensity = Math.max(0, child.intensity - delta * 50);
                     }
+                }
+                
+                // Fireplace flame flicker
+                if (child.userData && child.userData.isFire) {
+                    const flicker = Math.sin(time * 5 + child.userData.phase) * 0.3 + 0.7;
+                    child.scale.set(0.2 * flicker, 0.3 * flicker, 1);
+                    child.position.y = child.userData.baseY + Math.sin(time * 6 + child.userData.phase) * 0.05;
+                }
+                
+                // Candle flame flicker
+                if (child.userData && child.userData.isFlame) {
+                    const flicker = Math.sin(time * 8 + child.userData.phase) * 0.2 + 0.8;
+                    child.scale.setScalar(flicker);
+                    child.position.y = child.userData.baseY + Math.sin(time * 7 + child.userData.phase) * 0.02;
+                }
+                
+                // Fireplace light flicker
+                if (child.userData && child.userData.isFireLight) {
+                    child.intensity = 1.5 + Math.sin(time * 6) * 0.8 + Math.sin(time * 11) * 0.3;
                 }
             });
             
