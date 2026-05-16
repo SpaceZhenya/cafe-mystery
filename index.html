@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Тайна Ночного Кафе</title>
+    <title>Mystery of the Night Cafe</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
         
@@ -413,14 +413,14 @@
         <div class="scanlines"></div>
         
         <div class="intro-screen" id="intro">
-            <div class="intro-title">ТАЙНА</div>
-            <div class="intro-subtitle">НОЧНОГО КАФЕ</div>
-            <button class="start-btn" onclick="startGame()">НАЧАТЬ</button>
+            <div class="intro-title">MYSTERY</div>
+            <div class="intro-subtitle">OF THE NIGHT CAFE</div>
+            <button class="start-btn" onclick="startGame()">START</button>
         </div>
         
         <div id="ui-overlay">
             <div class="top-bar">
-                <div class="game-title">ТАЙНА НОЧНОГО КАФЕ</div>
+                <div class="game-title">MYSTERY OF THE NIGHT CAFE</div>
                 <div class="inventory" id="inventory"></div>
             </div>
             
@@ -429,13 +429,13 @@
             <div class="dialogue-box" id="dialogue-box">
                 <div class="speaker-name">
                     <div class="speaker-avatar"></div>
-                    <span id="speaker-name">Имя</span>
+                    <span id="speaker-name">Name</span>
                 </div>
-                <div class="dialogue-text" id="dialogue-text">Текст диалога...</div>
+                <div class="dialogue-text" id="dialogue-text">Dialogue text...</div>
                 <div class="choices" id="choices"></div>
             </div>
             
-            <div class="click-hint" id="click-hint">Кликните на персонажа для разговора</div>
+            <div class="click-hint" id="click-hint">Click on a character to talk</div>
         </div>
         
         <div class="notification" id="notification">
@@ -443,9 +443,9 @@
         </div>
 
         <div class="chapter-title" id="chapter-title"></div>
-        <div class="chapter-indicator" id="chapter-indicator">Глава 1: Ночное Кафе</div>
+        <div class="chapter-indicator" id="chapter-indicator">Chapter 1: Night Cafe</div>
         
-        <div class="loading" id="loading">ЗАГРУЗКА...</div>
+        <div class="loading" id="loading">LOADING...</div>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
@@ -541,7 +541,7 @@
         function toggleMusic() {
             if (!audioContext) return;
             window.isJazz = !window.isJazz;
-            showNotification(window.isJazz ? "Граммофон: Режим повышенной тональности" : "Граммофон: Уютный режим");
+            showNotification(window.isJazz ? "Gramophone: High Tone Mode" : "Gramophone: Cozy Mode");
             
             if (window.isJazz) {
                 window.audioOscillators.forEach(osc => { osc.frequency.value *= 1.25; });
@@ -553,878 +553,878 @@
         // NPC Data
         const npcData = {
             elena: {
-                name: "Элена",
+                name: "Elena",
                 color: 0xd4a574,
                 position: { x: -2, y: 0, z: 1 },
-                personality: "загадочная",
+                personality: "mysterious",
                 dialogueTree: {
                     intro: {
-                        text: "Одна посетительница в углу поднимает взгляд от книги. Её глаза цвета янтаря изучают вас с любопытством.",
+                        text: "A woman in the corner looks up from her book. Her amber-colored eyes study you with curiosity.",
                         choices: [
-                            { text: "Подойти и поздороваться", next: "greeting" },
-                            { text: "Притвориться, что не заметил", next: "ignore" }
+                            { text: "Approach and greet her", next: "greeting" },
+                            { text: "Pretend not to notice", next: "ignore" }
                         ]
                     },
                     greeting: {
-                        text: "Вы присели за соседний столик. 'Вы здесь часто бываете?' — спрашивает она, закрывая книгу. — 'Я Элена. Странно видеть новые лица в такое время...'",
+                        text: "You sit at the next table. 'Do you come here often?' she asks, closing her book. 'I'm Elena. Strange to see new faces at this hour...'",
                         choices: [
-                            { text: "'А почему такое время считается странным?'", next: "curious", relation: 10 },
-                            { text: "'Просто зашёл выпить кофе'", next: "dismissive", relation: -5 }
+                            { text: "'Why is this hour considered strange?'", next: "curious", relation: 10 },
+                            { text: "'Just came for coffee'", next: "dismissive", relation: -5 }
                         ]
                     },
                     ignore: {
-                        text: "Вы сели за барную стойку. Через несколько минут Элена сама подходит к вам.",
+                        text: "You sit at the bar. A few minutes later, Elena approaches you herself.",
                         choices: [
-                            { text: "Слушать", next: "surprise_approach" }
+                            { text: "Listen", next: "surprise_approach" }
                         ]
                     },
                     surprise_approach: {
-                        text: "'Вы избегаете людей?' — её голос мягкий, но в нём слышится вызов. — 'Я заметила. Но в этом кафе никто не приходит просто так.'",
+                        text: "'Are you avoiding people?' — her voice is soft, but there's a challenge in it. 'I noticed. But no one comes to this cafe just by chance.'",
                         choices: [
-                            { text: "'Вы правы. Я ищу кое-что'", next: "reveal", relation: 15 },
-                            { text: "'Просто хотел спокойствия'", next: "dismissive2", relation: -10 }
+                            { text: "'You're right. I'm looking for something'", next: "reveal", relation: 15 },
+                            { text: "'I just wanted some peace'", next: "dismissive2", relation: -10 }
                         ]
                     },
                     curious: {
-                        text: "'Это кафе... особенное', — она понижает голос. — 'По ночам здесь встречаются люди, которые ищут что-то. Что-то конкретное.'",
+                        text: "'This cafe... is special,' she lowers her voice. 'At night, people meet here who are looking for something. Something specific.'",
                         choices: [
-                            { text: "'Что именно они ищут?'", next: "secret", relation: 20 },
-                            { text: "Сменить тему", next: "change_topic" }
+                            { text: "'What exactly are they looking for?'", next: "secret", relation: 20 },
+                            { text: "Change the subject", next: "change_topic" }
                         ]
                     },
                     reveal: {
-                        text: "Элена кивает, как будто ожидала этого ответа. 'Я так и думала. У меня есть информация, но...' она смотрит на ваши руки. 'Ты принес что-нибудь ценное?'",
-                        effect: { clue: "старинный ключ" },
+                        text: "Elena nods, as if she expected this answer. 'I thought so. I have information, but...' she looks at your hands. 'Did you bring something valuable?'",
+                        effect: { clue: "antique key" },
                         choices: [
-                            { text: "Показать найденный ключ", next: "key_found", requires: "ключ" },
-                            { text: "'У меня ничего нет'", next: "no_item", relation: -5 }
+                            { text: "Show the found key", next: "key_found", requires: "key" },
+                            { text: "'I have nothing'", next: "no_item", relation: -5 }
                         ]
                     },
                     key_found: {
-                        text: "Её глаза расширяются. 'Это... ключ от подвала! Там хранится то, что ищут многие. Но туда ведёт только один путь...' она рисует на салфетке схему.",
-                        effect: { addItem: "схема подвала", clue: "схема" },
+                        text: "Her eyes widen. 'That's... the key to the basement! That's where what many seek is kept. But there's only one way in...' she sketches a map on a napkin.",
+                        effect: { addItem: "basement map", clue: "map" },
                         choices: [
-                            { text: "Спросить подробности", next: "basement_info", relation: 25 }
+                            { text: "Ask for details", next: "basement_info", relation: 25 }
                         ]
                     },
                     basement_info: {
-                        text: "'Подвал находится за барной стойкой. Чтобы попасть туда, нужно знать код. Ищи на стене картину с совой...'",
+                        text: "'The basement is behind the bar counter. To get in, you need to know the code. Look for a painting of an owl on the wall...'",
                         choices: [
-                            { text: "Запомнить и уйти", next: "end_conversation" }
+                            { text: "Remember and leave", next: "end_conversation" }
                         ]
                     },
                     secret: {
-                        text: "Она наклоняется ближе. 'Здесь ходят слухи об одном человеке... основателе кафе. Говорят, он спрятал что-то ценное перед смертью.'",
+                        text: "She leans closer. 'There are rumors here about a man... the founder of the cafe. They say he hid something valuable before his death.'",
                         choices: [
-                            { text: "Узнать больше", next: "founder_story", relation: 15 }
+                            { text: "Learn more", next: "founder_story", relation: 15 }
                         ]
                     },
                     founder_story: {
-                        text: "'Его звали Маркус. Он был коллекционером. Его коллекция... она где-то здесь, в здании. Но где — никто не знает.'",
+                        text: "'His name was Markus. He was a collector. His collection... it's somewhere here, in the building. But where — no one knows.'",
                         choices: [
-                            { text: "Как вы узнали об этом?", next: "how_know", relation: 10 },
-                            { text: "Спасибо за информацию", next: "end_conversation" }
+                            { text: "How do you know about this?", next: "how_know", relation: 10 },
+                            { text: "Thanks for the information", next: "end_conversation" }
                         ]
                     },
                     how_know: {
-                        text: "'Я... работала здесь раньше. До того, как он исчез.' В её глазах мелькает что-то тёмное. 'Многое знаю. Но не всё расскажу даром.'",
+                        text: "'I... used to work here. Before he disappeared.' Something dark flickers in her eyes. 'I know a lot. But I won't tell everything for free.'",
                         choices: [
-                            { text: "Что вам нужно?", next: "her_deal", relation: 5 }
+                            { text: "What do you need?", next: "her_deal", relation: 5 }
                         ]
                     },
                     her_deal: {
-                        text: "'Помоги мне найти одну вещь. Она была в коллекции Маркуса — золотая брошь с изображением луны. Найдёшь — расскажу всё остальное.'",
-                        effect: { quest: "найти брошь" },
+                        text: "'Help me find one thing. It was in Markus's collection — a golden brooch with a moon engraving. Find it, and I'll tell you everything else.'",
+                        effect: { quest: "find the brooch" },
                         choices: [
-                            { text: "Согласиться", next: "quest_accepted", relation: 20 },
-                            { text: "Отказаться", next: "quest_refused", relation: -10 }
+                            { text: "Agree", next: "quest_accepted", relation: 20 },
+                            { text: "Refuse", next: "quest_refused", relation: -10 }
                         ]
                     },
                     quest_accepted: {
-                        text: "'Хорошо. Начни с поисков в задней комнате. Там много коробок с вещами Маркуса.'",
+                        text: "'Good. Start by searching the back room. There are many boxes with Markus's things.'",
                         choices: [
-                            { text: "Отправиться на поиски", next: "end_conversation" }
+                            { text: "Set out to search", next: "end_conversation" }
                         ]
                     },
                     quest_refused: {
-                        text: "Элена холодно улыбается. 'Тогда ты многого не узнаешь. Но выбор за тобой.'",
+                        text: "Elena gives a cold smile. 'Then you won't learn much. But the choice is yours.'",
                         choices: [
-                            { text: "Уйти", next: "end_conversation" }
+                            { text: "Leave", next: "end_conversation" }
                         ]
                     },
                     end_conversation: {
-                        text: "Элена возвращается к своей книге. Вы чувствуете, что узнали что-то важное.",
+                        text: "Elena returns to her book. You feel you've learned something important.",
                         choices: [
-                            { text: "Отойти", next: null }
+                            { text: "Step away", next: null }
                         ]
                     },
                     change_topic: {
-                        text: "'Как хочешь', — она пожимает плечами и отводит взгляд.",
+                        text: "'As you wish,' she shrugs and looks away.",
                         choices: [
-                            { text: "Вернуться к теме", next: "curious" }
+                            { text: "Return to the topic", next: "curious" }
                         ]
                     },
                     dismissive: {
-                        text: "'Туристы здесь — редкость', — сухо замечает она. 'Особенно в такое время.'",
+                        text: "'Tourists are rare here,' she remarks dryly. 'Especially at this hour.'",
                         choices: [
-                            { text: "Присесть рядом", next: "curious" }
+                            { text: "Sit nearby", next: "curious" }
                         ]
                     },
                     dismissive2: {
-                        text: "Она понимающе кивает, но в глазах мелькает разочарование.",
+                        text: "She nods knowingly, but disappointment flickers in her eyes.",
                         choices: [
-                            { text: "Всё же рассказать правду", next: "reveal" }
+                            { text: "Tell the truth after all", next: "reveal" }
                         ]
                     },
                     no_item: {
-                        text: "'Жаль', — она качает головой. 'Приходи, когда найдёшь что-то стоящее.'",
+                        text: "'A pity,' she shakes her head. 'Come back when you find something worthwhile.'",
                         choices: [
-                            { text: "Отойти", next: "end_conversation" }
+                            { text: "Step away", next: "end_conversation" }
                         ]
                     }
                 },
                 chapter2: {
                     intro_ch2: {
-                        text: "Элена стоит у стеллажа с книгами в подвале. 'Ты всё-таки спустился. Я знала, что ты найдёшь путь.'",
+                        text: "Elena stands by a bookshelf in the basement. 'You made it down after all. I knew you'd find the way.'",
                         choices: [
-                            { text: "Что здесь происходит?", next: "ch2_explain", relation: 10 },
-                            { text: "Кто ты на самом деле?", next: "ch2_who" }
+                            { text: "What's happening here?", next: "ch2_explain", relation: 10 },
+                            { text: "Who are you really?", next: "ch2_who" }
                         ]
                     },
                     ch2_explain: {
-                        text: "'Это место — не просто подвал. Это хранилище. Маркус собирал не просто ценности — он собирал тайны. Каждая вещь здесь хранит частицу чьей-то души.'",
+                        text: "'This place is not just a basement. It's a vault. Markus didn't just collect valuables — he collected secrets. Every item here holds a fragment of someone's soul.'",
                         choices: [
-                            { text: "Зачем ты здесь?", next: "ch2_purpose", relation: 5 },
-                            { text: "Как отсюда выбраться?", next: "ch2_escape" }
+                            { text: "Why are you here?", next: "ch2_purpose", relation: 5 },
+                            { text: "How do I get out of here?", next: "ch2_escape" }
                         ]
                     },
                     ch2_who: {
-                        text: "'Я была его ученицей. Последней, кто видел его перед исчезновением. Он сказал мне: 'Если кто-то придёт искать — направь его. Но не дай коллекции поглотить его.''",
+                        text: "'I was his apprentice. The last one to see him before his disappearance. He told me: 'If someone comes seeking — guide them. But don't let the collection consume them.''",
                         choices: [
-                            { text: "Коллекция поглощает?", next: "ch2_devours", relation: 15 },
-                            { text: "Почему ты не остановила меня?", next: "ch2_stop" }
+                            { text: "The collection consumes people?", next: "ch2_devours", relation: 15 },
+                            { text: "Why didn't you stop me?", next: "ch2_stop" }
                         ]
                     },
                     ch2_purpose: {
-                        text: "'Я хранительница. Моя задача — следить, чтобы коллекция не попала в плохие руки. Но я чувствую... она хочет тебя. В ней есть своя воля.'",
+                        text: "'I am the keeper. My task is to ensure the collection doesn't fall into the wrong hands. But I sense... it wants you. It has a will of its own.'",
                         choices: [
-                            { text: "Что мне делать?", next: "ch2_advice", relation: 20 },
-                            { text: "Я не боюсь", next: "ch2_brave", relation: -5 }
+                            { text: "What should I do?", next: "ch2_advice", relation: 20 },
+                            { text: "I'm not afraid", next: "ch2_brave", relation: -5 }
                         ]
                     },
                     ch2_escape: {
-                        text: "'Выход есть только через испытание. Коллекция сама выберет, достоин ли ты уйти. Пройди три пробы — и она откроет тебе дверь.'",
+                        text: "'The only way out is through a trial. The collection itself will choose if you're worthy to leave. Pass three trials — and it will open the door for you.'",
                         choices: [
-                            { text: "Какие пробы?", next: "ch2_trials", relation: 10 }
+                            { text: "What trials?", next: "ch2_trials", relation: 10 }
                         ]
                     },
                     ch2_devours: {
-                        text: "'Она забирает память, волю, саму сущность. Сергей — тому пример. Он пытался украсть брошь и остался в ловушке между мирами.'",
-                        effect: { clue: "коллекция пожирает души" },
+                        text: "'It takes away memory, will, the very essence. Sergei is an example. He tried to steal the brooch and got trapped between worlds.'",
+                        effect: { clue: "the collection devours souls" },
                         choices: [
-                            { text: "Как спасти Сергея?", next: "ch2_save_serg" },
-                            { text: "Я всё равно пойду", next: "ch2_determined", relation: 15 }
+                            { text: "How to save Sergei?", next: "ch2_save_serg" },
+                            { text: "I'll go anyway", next: "ch2_determined", relation: 15 }
                         ]
                     },
                     ch2_stop: {
-                        text: "'Я не могла. Ты должен был сам всё увидеть. Иногда правда — единственный учитель.' Она отводит взгляд. 'Но я здесь, чтобы помочь.'",
+                        text: "'I couldn't. You had to see it all for yourself. Sometimes truth is the only teacher.' She looks away. 'But I'm here to help.'",
                         choices: [
-                            { text: "Помоги мне", next: "ch2_advice", relation: 25 }
+                            { text: "Help me", next: "ch2_advice", relation: 25 }
                         ]
                     },
                     ch2_advice: {
-                        text: "'Слушай своё сердце. Коллекция лжёт, искажает реальность. Но правду не спрячешь за иллюзиями. Иди в центр зала — там ждёт главное испытание.'",
-                        effect: { clue: "центр зала — главное испытание" },
+                        text: "'Listen to your heart. The collection lies, distorts reality. But you can't hide the truth behind illusions. Go to the center of the hall — the main trial awaits.'",
+                        effect: { clue: "center of the hall — the main trial" },
                         choices: [
-                            { text: "Идти в центр", next: "end_ch2_elena" }
+                            { text: "Go to the center", next: "end_ch2_elena" }
                         ]
                     },
                     ch2_brave: {
-                        text: "'Храбрец. Или глупец.' Она грустно улыбается. 'Но выбора у тебя всё равно нет. Иди в центр зала. Там — твоя судьба.'",
+                        text: "'Brave one. Or a fool.' She smiles sadly. 'But you have no choice anyway. Go to the center of the hall. Your fate awaits there.'",
                         choices: [
-                            { text: "Идти в центр", next: "end_ch2_elena" }
+                            { text: "Go to the center", next: "end_ch2_elena" }
                         ]
                     },
                     ch2_trials: {
-                        text: "'Проба страха, проба жадности и проба истины. Каждая — часть коллекции. Не поддавайся иллюзиям — и пройдёшь.'",
-                        effect: { quest: "пройти три пробы коллекции" },
+                        text: "'The trial of fear, the trial of greed, and the trial of truth. Each is part of the collection. Don't give in to the illusions — and you will pass.'",
+                        effect: { quest: "pass three trials of the collection" },
                         choices: [
-                            { text: "Я готов", next: "ch2_advice", relation: 10 }
+                            { text: "I'm ready", next: "ch2_advice", relation: 10 }
                         ]
                     },
                     ch2_save_serg: {
-                        text: "'Его спасёт только уничтожение коллекции. Если разбить главный артефакт — все души освободятся.' Она шепчет: 'Но тогда исчезнет и само кафе.'",
+                        text: "'Only destroying the collection can save him. If you shatter the main artifact — all souls will be freed.' She whispers: 'But then the cafe itself will vanish.'",
                         choices: [
-                            { text: "Я уничтожу коллекцию", next: "ch2_destroy_path", relation: 20 },
-                            { text: "Этого я не могу допустить", next: "ch2_keep_path", relation: -10 }
+                            { text: "I will destroy the collection", next: "ch2_destroy_path", relation: 20 },
+                            { text: "I can't allow that", next: "ch2_keep_path", relation: -10 }
                         ]
                     },
                     ch2_destroy_path: {
-                        text: "'Ты смелее, чем я думала. Главный артефакт — золотая сфера в центре коллекции. Разбей её — и всё закончится.'",
-                        effect: { addItem: "знание об артефакте" },
+                        text: "'You're braver than I thought. The main artifact is a golden sphere at the center of the collection. Break it — and everything will end.'",
+                        effect: { addItem: "artifact knowledge" },
                         choices: [
-                            { text: "Я запомню", next: "end_ch2_elena" }
+                            { text: "I'll remember", next: "end_ch2_elena" }
                         ]
                     },
                     ch2_keep_path: {
-                        text: "'Многие так говорят. А потом коллекция забирает их.' Она вздыхает. 'Надеюсь, ты окажешься сильнее.'",
+                        text: "'Many say that. And then the collection takes them.' She sighs. 'I hope you'll be stronger.'",
                         choices: [
-                            { text: "Увидим", next: "end_ch2_elena" }
+                            { text: "We'll see", next: "end_ch2_elena" }
                         ]
                     },
                     ch2_determined: {
-                        text: "'Знаю, что не остановлю. Тогда прими это.' Она протягивает вам старый компас. 'Он укажет путь, когда иллюзии сомкнутся вокруг тебя.'",
-                        effect: { addItem: "компас Элены" },
+                        text: "'I know I won't stop you. Then take this.' She hands you an old compass. 'It will show the way when the illusions close in around you.'",
+                        effect: { addItem: "Elena's compass" },
                         choices: [
-                            { text: "Спасибо", next: "end_ch2_elena" }
+                            { text: "Thank you", next: "end_ch2_elena" }
                         ]
                     },
                     end_ch2_elena: {
-                        text: "Элена кивает вам на прощание и растворяется в темноте подвала.",
+                        text: "Elena nods farewell and fades into the darkness of the basement.",
                         choices: [
-                            { text: "Идти дальше", next: null }
+                            { text: "Move on", next: null }
                         ]
                     }
                 }
             },
             marco: {
-                name: "Марко",
+                name: "Marco",
                 color: 0x8b6914,
                 position: { x: 2, y: 0, z: -1 },
-                personality: "внимательный",
+                personality: "attentive",
                 dialogueTree: {
                     intro: {
-                        text: "Бармен — худощавый мужчина с сединой в волосах — протирает стаканы. Его движения точны и выверены.",
+                        text: "The bartender — a lean man with grey in his hair — wipes glasses. His movements are precise and measured.",
                         choices: [
-                            { text: "Заказать напиток", next: "order" },
-                            { text: "Спросить о кафе", next: "about_cafe" }
+                            { text: "Order a drink", next: "order" },
+                            { text: "Ask about the cafe", next: "about_cafe" }
                         ]
                     },
                     order: {
-                        text: "'Что будете?' — его голос низкий, немного хриплый. — 'У нас хороший кофе. И не только.'",
+                        text: "'What will it be?' — his voice is low, slightly hoarse. — 'We have good coffee. And more.'",
                         choices: [
-                            { text: "'Кофе, пожалуйста'", next: "coffee", relation: 5 },
-                            { text: "'Что ещё есть?'", next: "special", relation: 10 }
+                            { text: "'Coffee, please'", next: "coffee", relation: 5 },
+                            { text: "'What else is there?'", next: "special", relation: 10 }
                         ]
                     },
                     coffee: {
-                        text: "Он молча кивает и начинает готовить кофе. 'Вы здесь впервые?' — спрашивает он, не глядя на вас.",
+                        text: "He nods silently and starts making coffee. 'Is this your first time here?' — he asks without looking at you.",
                         choices: [
-                            { text: "'Да. Интересное место'", next: "curious", relation: 10 },
-                            { text: "'Да'", next: "short", relation: 0 }
+                            { text: "'Yes. Interesting place'", next: "curious", relation: 10 },
+                            { text: "'Yes'", next: "short", relation: 0 }
                         ]
                     },
                     curious: {
-                        text: "'Многое повидал за эти годы', — он ставит чашку перед вами. — 'Люди приходят сюда с разными целями. Большинство — ищут что-то.'",
+                        text: "'I've seen a lot over the years,' — he places the cup before you. — 'People come here with different purposes. Most are searching for something.'",
                         choices: [
-                            { text: "'Что именно?'", next: "seekers", relation: 15 },
-                            { text: "Пить кофе молча", next: "silence" }
+                            { text: "'What exactly?'", next: "seekers", relation: 15 },
+                            { text: "Drink coffee in silence", next: "silence" }
                         ]
                     },
                     seekers: {
-                        text: "Марко усмехается. 'Кто — деньги. Кто — ответы. Кто — людей. А некоторые...' он смотрит на потолок, '...тех, кого уже не вернуть.'",
+                        text: "Marco smirks. 'Some — money. Some — answers. Some — people. And some...' he looks at the ceiling, '...those who can't be brought back.'",
                         choices: [
-                            { text: "'Вы говорите загадками'", next: "riddle", relation: 5 },
-                            { text: "'Это про основателя?'", next: "founder_q", relation: 20 }
+                            { text: "'You speak in riddles'", next: "riddle", relation: 5 },
+                            { text: "'Is this about the founder?'", next: "founder_q", relation: 20 }
                         ]
                     },
                     founder_q: {
-                        text: "Его лицо меняется — на мгновение проступает боль. 'Ты знаешь о Маркусе? Тогда ты пришёл по правильному адресу.'",
+                        text: "His face changes — for a moment pain shows through. 'You know about Marcus? Then you've come to the right place.'",
                         choices: [
-                            { text: "Расскажите о нём", next: "marco_story", relation: 25 }
+                            { text: "Tell me about him", next: "marco_story", relation: 25 }
                         ]
                     },
                     marco_story: {
-                        text: "'Он был моим другом. И моим учителем. Я работал здесь ещё при его жизни. Перед смертью он что-то спрятал. Сказал — тому, кто найдёт — будет награда.'",
+                        text: "'He was my friend. And my teacher. I worked here while he was still alive. Before his death, he hid something. Said — whoever finds it will be rewarded.'",
                         choices: [
-                            { text: "'Где искать?'", next: "where_hide", relation: 30 },
-                            { text: "Это было давно", next: "too_old", relation: -5 }
+                            { text: "'Where to look?'", next: "where_hide", relation: 30 },
+                            { text: "That was a long time ago", next: "too_old", relation: -5 }
                         ]
                     },
                     where_hide: {
-                        text: "'Подвал', — шепчет он. — 'Но туда не так просто попасть. Нужен ключ и код. Код... это дата. Дата открытия этого кафе.'",
-                        effect: { clue: "код подвала" },
+                        text: "'The basement,' — he whispers. — 'But it's not so easy to get there. You need a key and a code. The code... it's a date. The opening date of this cafe.'",
+                        effect: { clue: "basement code" },
                         choices: [
-                            { text: "'Какая дата?'", next: "date", relation: 20 },
-                            { text: "Сам найду", next: "end_conv" }
+                            { text: "'What date?'", next: "date", relation: 20 },
+                            { text: "I'll find it myself", next: "end_conv" }
                         ]
                     },
                     date: {
-                        text: "'15 марта 1987'. Запиши это, если память подводит. И Маркус... он оставил одну вещь. Для особенного человека.'",
-                        effect: { addItem: "дата открытия" },
+                        text: "'March 15, 1987'. Write it down if your memory fails you. And Marcus... he left one thing. For a special person.'",
+                        effect: { addItem: "opening date" },
                         choices: [
-                            { text: "Запомнить", next: "end_conv" }
+                            { text: "Remember", next: "end_conv" }
                         ]
                     },
                     about_cafe: {
-                        text: "'Это кафе существует с 1987 года', — Марко кивает на стену, где висят старые фотографии. — 'Многое изменилось. Но дух остался.'",
+                        text: "'This cafe has existed since 1987,' — Marco nods at the wall where old photographs hang. — 'Much has changed. But the spirit remains.'",
                         choices: [
-                            { text: "Рассмотреть фотографии", next: "photos", relation: 10 },
-                            { text: "Спросить о фотографиях", next: "photos_detail", relation: 15 }
+                            { text: "Examine the photographs", next: "photos", relation: 10 },
+                            { text: "Ask about the photographs", next: "photos_detail", relation: 15 }
                         ]
                     },
                     photos: {
-                        text: "Среди фотографий вы замечаете одну — мужчина с печальными глазами стоит у барной стойки. Рядом табличка с датой '15.03.1987'.",
-                        effect: { clue: "фотография основателя" },
+                        text: "Among the photographs you notice one — a man with sad eyes stands by the bar counter. Next to it a plaque with the date '15.03.1987'.",
+                        effect: { clue: "founder's photograph" },
                         choices: [
-                            { text: "'Это он?'", next: "that_him" }
+                            { text: "'Is that him?'", next: "that_him" }
                         ]
                     },
                     that_him: {
-                        text: "'Маркус. Основатель. Гений и мечтатель.' В голосе Марко звучит уважение и грусть.",
+                        text: "'Marcus. The founder. A genius and a dreamer.' Marco's voice carries respect and sadness.",
                         choices: [
-                            { text: "Что с ним случилось?", next: "what_happened", relation: 20 }
+                            { text: "What happened to him?", next: "what_happened", relation: 20 }
                         ]
                     },
                     what_happened: {
-                        text: "'Однажды он просто исчез. Оставил записку: 'Иду искать'. Больше его никто не видел.'",
+                        text: "'One day he simply disappeared. Left a note: 'Going to search'. Nobody saw him after that.'",
                         choices: [
-                            { text: "Искал что-то конкретное?", next: "what_search", relation: 15 },
-                            { text: "Понятно", next: "end_conv" }
+                            { text: "Was he looking for something specific?", next: "what_search", relation: 15 },
+                            { text: "I see", next: "end_conv" }
                         ]
                     },
                     what_search: {
-                        text: "'Коллекцию. Редкие вещи со всего мира. Но он искал одну — ту, что так и не нашёл при жизни.'",
-                        effect: { clue: "недостающая вещь" },
+                        text: "'A collection. Rare things from around the world. But he was looking for one — the one he never found in his lifetime.'",
+                        effect: { clue: "missing item" },
                         choices: [
-                            { text: "Какую?", next: "missing_item", relation: 20 }
+                            { text: "Which one?", next: "missing_item", relation: 20 }
                         ]
                     },
                     missing_item: {
-                        text: "'Не знаю. Он никогда не говорил напрямую. Но я видел его записи... там упоминалось что-то о 'лунном свете'.'",
+                        text: "'I don't know. He never said directly. But I saw his notes... there was mention of something about 'moonlight'.'",
                         choices: [
-                            { text: "Запомнить", next: "end_conv" }
+                            { text: "Remember", next: "end_conv" }
                         ]
                     },
                     special: {
-                        text: "Он наклоняется ближе. 'У нас есть особенный напиток. Готовлю только для особенных гостей.'",
+                        text: "He leans closer. 'We have a special drink. I only prepare it for special guests.'",
                         choices: [
-                            { text: "Попробовать", next: "special_drink", relation: 15 },
-                            { text: "В другой раз", next: "later" }
+                            { text: "Try it", next: "special_drink", relation: 15 },
+                            { text: "Another time", next: "later" }
                         ]
                     },
                     special_drink: {
-                        text: "Через минуту перед вами появляется коктейль с золотистым свечением. 'Называется «Память», — говорит Марко. — 'Помогает увидеть то, что скрыто.'",
-                        effect: { vision: "показать скрытую дверь" },
+                        text: "A minute later a cocktail with a golden glow appears before you. 'It's called «Memory»,' — says Marco. — 'It helps you see what is hidden.'",
+                        effect: { vision: "reveal hidden door" },
                         choices: [
-                            { text: "Выпить", next: "drink_vision", relation: 30 },
-                            { text: "Нет, спасибо", next: "refuse_drink", relation: -5 }
+                            { text: "Drink it", next: "drink_vision", relation: 30 },
+                            { text: "No, thanks", next: "refuse_drink", relation: -5 }
                         ]
                     },
                     drink_vision: {
-                        text: "Напиток обжигает горло. Вздрогнув, вы замечаете — за стеллажом с бутылками едва видна дверь. До этого её там не было.",
-                        effect: { addItem: "видение двери" },
+                        text: "The drink burns your throat. Shuddering, you notice — behind the shelf with bottles, a door is barely visible. It wasn't there before.",
+                        effect: { addItem: "door vision" },
                         choices: [
-                            { text: "Спросить о двери", next: "door_question", relation: 25 }
+                            { text: "Ask about the door", next: "door_question", relation: 25 }
                         ]
                     },
                     door_question: {
-                        text: "Марко широко улыбается. 'Ты увидел. Значит, готов. Дверь ведёт в подвал. Но без ключа там делать нечего.'",
+                        text: "Marco smiles broadly. 'You saw it. So you're ready. The door leads to the basement. But without the key, there's nothing to do there.'",
                         choices: [
-                            { text: "Есть ключ", next: "have_key", requires: "ключ" },
-                            { text: "Где ключ?", next: "key_where" }
+                             { text: "I have the key", next: "have_key", requires: "key" },
+                            { text: "Where's the key?", next: "key_where" }
                         ]
                     },
                     have_key: {
-                        text: "'Тогда ты можешь пройти. Но там... опасно. Маркус защитил свою коллекцию.'",
-                        effect: { unlock: "подвал" },
+                        text: "'Then you can go through. But it's... dangerous there. Marcus protected his collection.'",
+                        effect: { unlock: "basement" },
                         choices: [
-                            { text: "Войти", next: "enter_basement" }
+                            { text: "Enter", next: "enter_basement" }
                         ]
                     },
                     enter_basement: {
-                        text: "Марко нажимает на скрытую кнопку. Стеллаж отодвигается, открывая каменную лестницу вниз.",
-                        effect: { clue: "подвал открыт" },
+                        text: "Marco presses a hidden button. The shelf slides aside, revealing a stone staircase going down.",
+                        effect: { clue: "basement opened" },
                         choices: [
-                            { text: "Спуститься", next: "basement_scene" }
+                            { text: "Go down", next: "basement_scene" }
                         ]
                     },
                     end_conv: {
-                        text: "Марко возвращается к работе. Вы чувствуете на себе его взгляд.",
+                        text: "Marco returns to work. You feel his gaze on you.",
                         choices: [
-                            { text: "Отойти", next: null }
+                            { text: "Step away", next: null }
                         ]
                     },
                     silence: {
-                        text: "Вы молча пьёте кофе. Марко понимающе кивает и отходит к другим посетителям.",
+                        text: "You silently drink your coffee. Marco nods understandingly and moves to other patrons.",
                         choices: [
-                            { text: "Окликнуть его", next: "curious" }
+                            { text: "Call out to him", next: "curious" }
                         ]
                     },
                     riddle: {
-                        text: "'В этом кафе каждый ищет что-то своё', — загадочно улыбается он. 'А ты, похоже, нашёл то, что искал.'",
+                        text: "'In this cafe, everyone searches for something of their own,' — he smiles mysteriously. 'And you, it seems, have found what you were looking for.'",
                         choices: [
-                            { text: "Я ищу коллекцию", next: "founder_q", relation: 10 }
+                            { text: "I'm looking for the collection", next: "founder_q", relation: 10 }
                         ]
                     },
                     too_old: {
-                        text: "Марко грустно смотрит в пустоту. 'Для меня — нет. Я помню каждый день, проведённый здесь.'",
+                        text: "Marco looks sadly into the void. 'For me — no. I remember every day spent here.'",
                         choices: [
-                            { text: "Расскажите", next: "marco_story", relation: 5 }
+                            { text: "Tell me", next: "marco_story", relation: 5 }
                         ]
                     },
                     photos_detail: {
-                        text: "'На той фотографии — Маркус в день открытия. Он сам повесил её сюда в памятный вечер.'",
+                        text: "'In that photograph — Marcus on opening day. He hung it here himself on that memorable evening.'",
                         choices: [
-                            { text: "Рассмотреть ближе", next: "photos" }
+                            { text: "Take a closer look", next: "photos" }
                         ]
                     },
                     key_where: {
-                        text: "'Понятия не имею', — он разводит руками. 'Маркус хранил его где-то в кафе. Может, у Нины спроси?'",
+                        text: "'I have no idea,' — he spreads his hands. 'Marcus kept it somewhere in the cafe. Maybe ask Nina?'",
                         choices: [
-                            { text: "Спросить Нину", next: "end_conv" }
+                            { text: "Ask Nina", next: "end_conv" }
                         ]
                     },
                     refuse_drink: {
-                        text: "Марко убирает коктейль. 'Как знаешь. Но видение — это не всегда плохо. Оно открывает глаза.'",
+                        text: "Marco takes the cocktail away. 'As you wish. But a vision isn't always a bad thing. It opens your eyes.'",
                         choices: [
-                            { text: "Передумать", next: "special_drink" }
+                            { text: "Change my mind", next: "special_drink" }
                         ]
                     },
                     later: {
-                        text: "'В любое время', — кивает он и возвращается к своим стаканам.",
+                        text: "'Any time,' — he nods and returns to his glasses.",
                         choices: [
-                            { text: "Заказать кофе", next: "coffee" }
+                            { text: "Order coffee", next: "coffee" }
                         ]
                     },
                     basement_scene: {
-                        text: "Лестница уходит в густую темноту. Слышен запах сырости, старой бумаги и чего-то ещё... необъяснимого.",
+                        text: "The staircase descends into thick darkness. You can smell dampness, old paper, and something else... inexplicable.",
                         choices: [
-                            { text: "Спуститься в подвал", next: null }
+                            { text: "Descend into the basement", next: null }
                         ]
                     },
                     short: {
-                        text: "Он коротко кивает. 'Будет готов через минуту.' Через минуту перед вами появляется чашка дымящегося кофе.",
+                        text: "He nods briefly. 'Will be ready in a minute.' A minute later a cup of steaming coffee appears before you.",
                         choices: [
-                            { text: "Пить кофе", next: "coffee" }
+                            { text: "Drink coffee", next: "coffee" }
                         ]
                     }
                 },
                 chapter2: {
                     intro_ch2: {
-                        text: "Марко сидит на ящике в углу подвала, перебирая старые бумаги. 'А вот и ты. Знал, что ты спустишься. Чувствовал.'",
+                        text: "Marco sits on a crate in the corner of the basement, sorting through old papers. 'And here you are. Knew you'd come down. Felt it.'",
                         choices: [
-                            { text: "Ты тоже здесь?", next: "ch2_here" },
-                            { text: "Что это за место?", next: "ch2_place" }
+                            { text: "You're here too?", next: "ch2_here" },
+                            { text: "What is this place?", next: "ch2_place" }
                         ]
                     },
                     ch2_here: {
-                        text: "'Я живу здесь большую часть времени. Присматриваю за коллекцией. Маркус перед уходом попросил меня беречь её.' Он горько усмехается. 'Ушёл, а я остался.'",
+                        text: "'I live here most of the time. I look after the collection. Before he left, Marcus asked me to guard it.' He laughs bitterly. 'He left, and I stayed.'",
                         choices: [
-                            { text: "Почему ты не ушёл?", next: "ch2_stay" },
-                            { text: "Ты знаешь, как её уничтожить?", next: "ch2_destroy" }
+                            { text: "Why didn't you leave?", next: "ch2_stay" },
+                            { text: "Do you know how to destroy it?", next: "ch2_destroy" }
                         ]
                     },
                     ch2_place: {
-                        text: "'Это сердце кафе. Самое старое помещение в здании. Коллекция питается от этого места — от воспоминаний, от эмоций посетителей.'",
+                        text: "'This is the heart of the cafe. The oldest room in the building. The collection feeds off this place — off memories, off the emotions of visitors.'",
                         choices: [
-                            { text: "Это опасно?", next: "ch2_danger", relation: 10 },
-                            { text: "Как пройти испытания?", next: "ch2_trials_marco" }
+                            { text: "Is it dangerous?", next: "ch2_danger", relation: 10 },
+                            { text: "How do I pass the trials?", next: "ch2_trials_marco" }
                         ]
                     },
                     ch2_stay: {
-                        text: "'Я дал слово. И потом...' он смотрит на свои руки. 'Коллекция уже часть меня. Если я уйду — она заберёт часть души.'",
+                        text: "'I gave my word. And besides...' he looks at his hands. 'The collection is already part of me. If I leave — it will take a piece of my soul.'",
                         choices: [
-                            { text: "Я помогу тебе освободиться", next: "ch2_free", relation: 20 },
-                            { text: "Ты боишься?", next: "ch2_afraid", relation: -5 }
+                            { text: "I'll help you break free", next: "ch2_free", relation: 20 },
+                            { text: "Are you afraid?", next: "ch2_afraid", relation: -5 }
                         ]
                     },
                     ch2_destroy: {
-                        text: "Марко резво поднимает голову. 'Уничтожить? Зачем? Это же величайшее собрание... Хотя...' Он замолкает. 'Она забирает людей. Я видел.'",
+                        text: "Marco lifts his head sharply. 'Destroy it? Why? It's the greatest collection... Although...' He falls silent. 'It takes people. I've seen it.'",
                         choices: [
-                            { text: "Можно ли её уничтожить?", next: "ch2_can_destroy" },
-                            { text: "Можно ли её контролировать?", next: "ch2_control" }
+                            { text: "Can it be destroyed?", next: "ch2_can_destroy" },
+                            { text: "Can it be controlled?", next: "ch2_control" }
                         ]
                     },
                     ch2_danger: {
-                        text: "'Опасно — не то слово. Она читает твои мысли, твои страхи. Воплощает их. Чтобы пройти — нужно быть честным с самим собой.'",
+                        text: "'Dangerous is an understatement. It reads your thoughts, your fears. Manifests them. To get through — you need to be honest with yourself.'",
                         choices: [
-                            { text: "Как мне подготовиться?", next: "ch2_prepare", relation: 15 }
+                            { text: "How do I prepare?", next: "ch2_prepare", relation: 15 }
                         ]
                     },
                     ch2_trials_marco: {
-                        text: "'Три испытания. Страх, жадность, истина. Но есть и четвёртое — выбор. Именно он решает твою судьбу.'",
+                        text: "'Three trials. Fear, greed, truth. But there's a fourth — choice. That's what decides your fate.'",
                         choices: [
-                            { text: "Что за выбор?", next: "ch2_choice", relation: 10 }
+                            { text: "What choice?", next: "ch2_choice", relation: 10 }
                         ]
                     },
                     ch2_free: {
-                        text: "'Ты серьёзно?' В его глазах загорается надежда. 'Если разбить сердце коллекции — золотой шар в центре — все привязанные к ней души освободятся. Включая меня.'",
+                        text: "'Are you serious?' Hope lights up in his eyes. 'If you shatter the heart of the collection — the golden sphere at the center — all souls bound to it will be freed. Including me.'",
                         choices: [
-                            { text: "Я сделаю это", next: "ch2_agreed", relation: 25 },
-                            { text: "Мне нужно подумать", next: "end_ch2_marco" }
+                            { text: "I'll do it", next: "ch2_agreed", relation: 25 },
+                            { text: "I need to think", next: "end_ch2_marco" }
                         ]
                     },
                     ch2_afraid: {
-                        text: "'Боюсь. Глупо не бояться. Но страх не остановит меня. Как и тебя, надеюсь.'",
+                        text: "'I'm afraid. It's foolish not to be. But fear won't stop me. Nor you, I hope.'",
                         choices: [
-                            { text: "Ты прав. Я не остановлюсь", next: "ch2_free", relation: 10 }
+                            { text: "You're right. I won't stop", next: "ch2_free", relation: 10 }
                         ]
                     },
                     ch2_can_destroy: {
-                        text: "'Можно... если знать как. Нужно одновременно коснуться трёх символов на основании пьедестала. Но коснуться должен тот, кто чист душой.'",
-                        effect: { clue: "символы на пьедестале" },
+                        text: "'It's possible... if you know how. You need to touch three symbols on the base of the pedestal simultaneously. But the one who touches them must be pure of soul.'",
+                        effect: { clue: "symbols on the pedestal" },
                         choices: [
-                            { text: "Я попробую", next: "ch2_prepare", relation: 15 }
+                            { text: "I'll try", next: "ch2_prepare", relation: 15 }
                         ]
                     },
                     ch2_control: {
-                        text: "'Никто не может. Маркус пытался — и исчез. Коллекция сильнее любого человека. Её можно только принять или уничтожить.'",
+                        text: "'No one can. Marcus tried — and vanished. The collection is stronger than any person. It can only be accepted or destroyed.'",
                         choices: [
-                            { text: "Я уничтожу её", next: "ch2_free", relation: 20 },
-                            { text: "Я приму её", next: "ch2_accept", relation: -15 }
+                            { text: "I will destroy it", next: "ch2_free", relation: 20 },
+                            { text: "I will accept it", next: "ch2_accept", relation: -15 }
                         ]
                     },
                     ch2_prepare: {
-                        text: "'Возьми это.' Он протягивает старый ключ с красным камнем. 'Он открывает проход к сердцу коллекции. Без него не пройти.'",
-                        effect: { addItem: "ключ Марко" },
+                        text: "'Take this.' He holds out an old key with a red stone. 'It opens the passage to the heart of the collection. You can't get through without it.'",
+                        effect: { addItem: "Marco's Key" },
                         choices: [
-                            { text: "Спасибо", next: "end_ch2_marco" }
+                            { text: "Thank you", next: "end_ch2_marco" }
                         ]
                     },
                     ch2_choice: {
-                        text: "'Коллекция предложит тебе что-то. Что-то, что ты хочешь больше всего. Не бери. Это ловушка. Истинная награда — не в вещах.'",
+                        text: "'The collection will offer you something. Something you want more than anything. Don't take it. It's a trap. The true reward isn't in things.'",
                         choices: [
-                            { text: "Я запомню", next: "end_ch2_marco", relation: 20 }
+                            { text: "I'll remember", next: "end_ch2_marco", relation: 20 }
                         ]
                     },
                     ch2_agreed: {
-                        text: "'Тогда иди. Я буду ждать здесь. Если у тебя получится — я наконец буду свободен.'",
+                        text: "'Then go. I'll be waiting here. If you succeed — I'll finally be free.'",
                         choices: [
-                            { text: "Я вернусь", next: "end_ch2_marco" }
+                            { text: "I'll be back", next: "end_ch2_marco" }
                         ]
                     },
                     ch2_accept: {
-                        text: "'Ты не понимаешь, что говоришь. Никто не принимает коллекцию. Она принимает тебя. И ты уже никогда не будешь прежним.'",
+                        text: "'You don't know what you're saying. No one accepts the collection. It accepts you. And you'll never be the same.'",
                         choices: [
-                            { text: "Посмотрим", next: "end_ch2_marco" }
+                            { text: "We'll see", next: "end_ch2_marco" }
                         ]
                     },
                     end_ch2_marco: {
-                        text: "Марко отворачивается и продолжает перебирать бумаги, погружённый в свои мысли.",
+                        text: "Marco turns away and continues sorting through papers, lost in his thoughts.",
                         choices: [
-                            { text: "Идти дальше", next: null }
+                            { text: "Move on", next: null }
                         ]
                     }
                 }
             },
             nina: {
-                name: "Нина",
+                name: "Nina",
                 color: 0xc9a27e,
                 position: { x: 0, y: 0, z: 2 },
-                personality: "нервная",
+                personality: "nervous",
                 dialogueTree: {
                     intro: {
-                        text: "Молодая женщина сидит в центре зала, нервно постукивая пальцами по столу. Её взгляд бегает по комнате.",
+                        text: "A young woman sits in the center of the hall, nervously tapping her fingers on the table. Her eyes dart around the room.",
                         choices: [
-                            { text: "Подойти", next: "approach" },
-                            { text: "Наблюдать издалека", next: "observe" }
+                            { text: "Approach", next: "approach" },
+                            { text: "Observe from afar", next: "observe" }
                         ]
                     },
                     approach: {
-                        text: "Нина вздрагивает, когда вы подходите. 'О, это вы... извините, я немного на нервах.'",
+                        text: "Nina flinches as you approach. 'Oh, it's you... sorry, I'm a bit on edge.'",
                         choices: [
-                            { text: "'Что-то случилось?'", next: "what_worry", relation: 10 },
-                            { text: "'Можно присесть?'", next: "sit_down" }
+                            { text: "'Something happened?'", next: "what_worry", relation: 10 },
+                            { text: "'May I sit down?'", next: "sit_down" }
                         ]
                     },
                     what_worry: {
-                        text: "'Я жду... кого-то. Человека, который должен принести мне важную вещь.' Она нервно смотрит на входную дверь.",
+                        text: "'I'm waiting... for someone. Someone who was supposed to bring me something important.' She nervously glances at the entrance door.",
                         choices: [
-                            { text: "'Могу помочь?'", next: "help_offer", relation: 15 },
-                            { text: "Не вмешиваться", next: "not_interfere", relation: -5 }
+                            { text: "'Can I help?'", next: "help_offer", relation: 15 },
+                            { text: "Don't interfere", next: "not_interfere", relation: -5 }
                         ]
                     },
                     help_offer: {
-                        text: "'Вы... вы можете помочь! Слушайте, мне нужно найти человека. Его зовут Сергей. Он должен был принести мне брошь — ту, что с луной.'",
-                        effect: { quest: "найти Сергея" },
+                        text: "'You... you can help! Listen, I need to find someone. His name is Sergei. He was supposed to bring me a brooch — the one with the moon.'",
+                        effect: { quest: "find Sergei" },
                         choices: [
-                            { text: "Как он выглядит?", next: "serg_look", relation: 20 },
-                            { text: "Это кажется подозрительным", next: "suspicious", relation: -10 }
+                            { text: "What does he look like?", next: "serg_look", relation: 20 },
+                            { text: "This seems suspicious", next: "suspicious", relation: -10 }
                         ]
                     },
                     serg_look: {
-                        text: "'Высокий, худой, всегда в чёрном. У него шрам на левой руке. Вы его встречали?'",
+                        text: "'Tall, thin, always in black. He has a scar on his left arm. Have you seen him?'",
                         choices: [
-                            { text: "Поискать в кафе", next: "search_cafe", relation: 25 },
-                            { text: "Не видел", next: "not_seen", relation: -5 }
+                            { text: "Search the cafe", next: "search_cafe", relation: 25 },
+                            { text: "Haven't seen him", next: "not_seen", relation: -5 }
                         ]
                     },
                     search_cafe: {
-                        text: "Вы осматриваете кафе и замечаете подозрительного мужчину в углу.",
-                        effect: { found: "сергей" },
+                        text: "You scan the cafe and notice a suspicious man in the corner.",
+                        effect: { found: "sergei" },
                         choices: [
-                            { text: "Указать Нине", next: "show_serg", relation: 30 }
+                            { text: "Point him out to Nina", next: "show_serg", relation: 30 }
                         ]
                     },
                     show_serg: {
-                        text: "'Вот он! Это Сергей! Но он... он выглядит странно. Что-то случилось?'",
+                        text: "'There he is! That's Sergei! But he... he looks strange. Something happened?'",
                         choices: [
-                            { text: "Узнать", next: "serg_status", relation: 15 }
+                            { text: "Find out", next: "serg_status", relation: 15 }
                         ]
                     },
                     serg_status: {
-                        text: "Вы подходите к Сергею. Он сидит неподвижно, уставившись в одну точку. 'Он... он мёртв?'",
-                        effect: { clue: "тело Сергея" },
+                        text: "You approach Sergei. He sits motionless, staring at a single spot. 'Is he... is he dead?'",
+                        effect: { clue: "Sergei's body" },
                         choices: [
-                            { text: "Проверить пульс", next: "check_pulse" },
-                            { text: "Отойти и позвать Марко", next: "call_marco" }
+                            { text: "Check his pulse", next: "check_pulse" },
+                            { text: "Step back and call Marco", next: "call_marco" }
                         ]
                     },
                     check_pulse: {
-                        text: "Нет, он дышит. Но... его глаза открыты и не моргают. Похоже на сон наяву.",
-                        effect: { clue: " Сергей в трансе" },
+                        text: "No, he's breathing. But... his eyes are open and not blinking. It's like a waking dream.",
+                        effect: { clue: "Sergei in a trance" },
                         choices: [
-                            { text: "Попытаться разбудить", next: "wake_him" },
-                            { text: "Оставить в покое", next: "leave_him" }
+                            { text: "Try to wake him", next: "wake_him" },
+                            { text: "Leave him alone", next: "leave_him" }
                         ]
                     },
                     wake_him: {
-                        text: "Вы пытаетесь привести его в себя. Нина подходит сзади: 'Не надо! Он... он опасен, когда его беспокоят!'",
-                        effect: { clue: "Нина что-то скрывает" },
+                        text: "You try to bring him around. Nina approaches from behind: 'Don't! He... he's dangerous when disturbed!'",
+                        effect: { clue: "Nina is hiding something" },
                         choices: [
-                            { text: "Почему опасен?", next: "why_danger", relation: -10 },
-                            { text: "Извините", next: "leave_him" }
+                            { text: "Why is he dangerous?", next: "why_danger", relation: -10 },
+                            { text: "Sorry", next: "leave_him" }
                         ]
                     },
                     why_danger: {
-                        text: "Нина отступает. 'Он... он связан с Маркусом. Тем, кто ищет коллекцию... иногда не возвращаются.'",
-                        effect: { clue: " Нина знает больше" },
+                        text: "Nina steps back. 'He... he's connected to Marcus. Those who seek the collection... sometimes don't come back.'",
+                        effect: { clue: "Nina knows more" },
                         choices: [
-                            { text: "Расскажите всё", next: "tell_all", relation: 25 }
+                            { text: "Tell me everything", next: "tell_all", relation: 25 }
                         ]
                     },
                     tell_all: {
-                        text: "'Я работала на Маркуса. До того, как он исчез. Он нашёл что-то... что-то, что изменило его. После этого люди начали пропадать.'",
+                        text: "'I worked for Marcus. Before he disappeared. He found something... something that changed him. After that, people started disappearing.'",
                         choices: [
-                            { text: "Что он нашёл?", next: "what_found", relation: 30 }
+                            { text: "What did he find?", next: "what_found", relation: 30 }
                         ]
                     },
                     what_found: {
-                        text: "'Не знаю точно. Но это было связано с подвалом. Там что-то есть. Что-то... нехорошее.' Она достаёт из кармана предмет. 'Возьми. Это поможет.'",
-                        effect: { addItem: "амулет защиты" },
+                        text: "'I don't know exactly. But it was connected to the basement. There's something there. Something... not right.' She takes an item from her pocket. 'Take it. It'll help.'",
+                        effect: { addItem: "protection amulet" },
                         choices: [
-                            { text: "Взять", next: "take_amulet" }
+                            { text: "Take it", next: "take_amulet" }
                         ]
                     },
                     take_amulet: {
-                        text: "Это старинный медальон с символом глаза. 'Не снимай его в подвале', — говорит Нина. — 'Там темно. И не все, кто туда вошёл, вышли обратно.'",
+                        text: "It's an antique medallion with an eye symbol. 'Don't take it off in the basement,' Nina says. 'It's dark there. And not everyone who went in came back out.'",
                         choices: [
-                            { text: "Идти в подвал", next: "go_basement" }
+                            { text: "Go to the basement", next: "go_basement" }
                         ]
                     },
                     go_basement: {
-                        text: "Вы направляетесь к двери подвала. Теперь вы готовы.",
+                        text: "You head toward the basement door. Now you're ready.",
                         effect: { trigger: "go_to_basement" },
                         choices: [
-                            { text: "Отправиться", next: "end_conv" }
+                            { text: "Proceed", next: "end_conv" }
                         ]
                     },
                     observe: {
-                        text: "Вы наблюдаете за Ниной издалека. Через несколько минут она встаёт и направляется к бару, бормоча что-то себе под нос.",
+                        text: "You watch Nina from afar. After a few minutes, she stands up and heads to the bar, muttering something under her breath.",
                         choices: [
-                            { text: "Подойти", next: "approach" }
+                            { text: "Approach", next: "approach" }
                         ]
                     },
                     sit_down: {
-                        text: "Она неохотно кивает. 'Как хочешь. Но лучше не лезь в чужие дела.'",
+                        text: "She nods reluctantly. 'Suit yourself. But better not poke your nose into other people's business.'",
                         choices: [
-                            { text: "Извините", next: "apologize", relation: -5 }
+                            { text: "Sorry", next: "apologize", relation: -5 }
                         ]
                     },
                     apologize: {
-                        text: "'Ладно, извинения приняты.' Она чуть расслабляется. 'Меня зовут Нина. Я здесь из-за одной проблемы.'",
+                        text: "'Fine, apology accepted.' She relaxes a little. 'My name is Nina. I'm here because of a problem.'",
                         choices: [
-                            { text: "Слушать", next: "problem", relation: 10 }
+                            { text: "Listen", next: "problem", relation: 10 }
                         ]
                     },
                     problem: {
-                        text: "'Человек должен мне вещь. Очень важную. Без неё... без неё мне не выбраться отсюда.'",
+                        text: "'Someone owes me something. Something very important. Without it... without it I can't get out of here.'",
                         choices: [
-                            { text: "От чего выбраться?", next: "escape", relation: 15 }
+                            { text: "Get out of where?", next: "escape", relation: 15 }
                         ]
                     },
                     escape: {
-                        text: "Она смеётся, но в её смехе нет радости. 'Отсюда. Из этого кафе. Оно... оно не отпускает просто так.'",
+                        text: "She laughs, but there's no joy in it. 'From here. From this cafe. It... it doesn't let go so easily.'",
                         choices: [
-                            { text: "Что вы имеете в виду?", next: "cafe_trapped", relation: 20 }
+                            { text: "What do you mean?", next: "cafe_trapped", relation: 20 }
                         ]
                     },
                     cafe_trapped: {
-                        text: "'Это место необычное. Рано или поздно все здесь оказываются по какой-то причине. И либо находят то, что ищут, либо... остаются навсегда.'",
+                        text: "'This place is unusual. Sooner or later everyone ends up here for some reason. And either they find what they're looking for, or... they stay forever.'",
                         choices: [
-                            { text: "Это угроза?", next: "threat", relation: -10 },
-                            { text: "Как выбраться?", next: "how_leave", relation: 25 }
+                            { text: "Is that a threat?", next: "threat", relation: -10 },
+                            { text: "How do we get out?", next: "how_leave", relation: 25 }
                         ]
                     },
                     how_leave: {
-                        text: "'Найди коллекцию Маркуса. Это ключ. Тот, кто её получит — получит свободу.'",
-                        effect: { clue: "коллекция = свобода" },
+                        text: "'Find Marcus's collection. That's the key. Whoever gets it — gains freedom.'",
+                        effect: { clue: "collection = freedom" },
                         choices: [
-                            { text: "Понял", next: "end_conv" }
+                            { text: "Understood", next: "end_conv" }
                         ]
                     },
                     not_interfere: {
-                        text: "Вы отошли. Через минуту Нина сама подходит к вам. 'Ты не из тех, кто лезет в чужое. Умно.'",
+                        text: "You step away. A minute later, Nina approaches you herself. 'You're not one of those who meddles. Smart.'",
                         relation: 10,
                         choices: [
-                            { text: "Слушать", next: "problem" }
+                            { text: "Listen", next: "problem" }
                         ]
                     },
                     end_conv: {
-                        text: "Нина отворачивается. Вы чувствуете, что узнали важную информацию.",
+                        text: "Nina turns away. You feel like you've learned some important information.",
                         choices: [
-                            { text: "Отойти", next: null }
+                            { text: "Step away", next: null }
                         ]
                     },
                     suspicious: {
-                        text: "Нина настороженно смотрит на вас. 'Ты что, из них? Из тех, кто охотится за коллекцией?'",
+                        text: "Nina looks at you warily. 'Are you one of them? One of those hunting for the collection?'",
                         choices: [
-                            { text: "Из кого?", next: "from_them" }
+                            { text: "One of whom?", next: "from_them" }
                         ]
                     },
                     not_seen: {
-                        text: "'Он где-то здесь... я чувствую', — она нервно оглядывается по сторонам.",
+                        text: "'He's somewhere here... I can feel it,' she glances around nervously.",
                         choices: [
-                            { text: "Помочь найти", next: "search_cafe" }
+                            { text: "Help find him", next: "search_cafe" }
                         ]
                     },
                     call_marco: {
-                        text: "Марко подходит, смотрит на Сергея и качает головой. 'Опять.' Он трогает пульс Сергея и хмурится.",
-                        effect: { clue: "Марко знает о Сергее" },
+                        text: "Marco approaches, looks at Sergei and shakes his head. 'Again.' He checks Sergei's pulse and frowns.",
+                        effect: { clue: "Marco knows about Sergei" },
                         choices: [
-                            { text: "Что значит 'опять'?", next: "marco_knows" }
+                            { text: "What do you mean, 'again'?", next: "marco_knows" }
                         ]
                     },
                     leave_him: {
-                        text: "Вы отходите от Сергея. Нина облегчённо выдыхает и жестом просит вас подойти.",
+                        text: "You step away from Sergei. Nina sighs in relief and gestures for you to come over.",
                         choices: [
-                            { text: "Поговорить с Ниной", next: "approach" }
+                            { text: "Talk to Nina", next: "approach" }
                         ]
                     },
                     threat: {
-                        text: "'Нет, что ты', — она качает головой. 'Просто предупреждение. Это место — ловушка для душ.'",
+                        text: "'No, not at all,' she shakes her head. 'Just a warning. This place is a trap for souls.'",
                         choices: [
-                            { text: "Как выбраться?", next: "how_leave" }
+                            { text: "How do we get out?", next: "how_leave" }
                         ]
                     },
                     from_them: {
-                        text: "'Из тех, кто ищет коллекцию Маркуса. Многие хотят её найти. И многие... пропадают в подвале.'",
+                        text: "'The ones looking for Marcus's collection. Many want to find it. And many... disappear in the basement.'",
                         choices: [
-                            { text: "Я не из них. Я хочу помочь", next: "help_offer", relation: 10 }
+                            { text: "I'm not one of them. I want to help", next: "help_offer", relation: 10 }
                         ]
                     },
                     marco_knows: {
-                        text: "'Сергей — не первый, кто впал в транс после поисков коллекции. Маркус защитил её странным образом. Защита наказала его.'",
+                        text: "'Sergei isn't the first to fall into a trance after searching for the collection. Marcus protected it in a strange way. The defense punished him.'",
                         choices: [
-                            { text: "Как снять транс?", next: "wake_him" }
+                            { text: "How to break the trance?", next: "wake_him" }
                         ]
                     }
                 },
                 chapter2: {
                     intro_ch2: {
-                        text: "Нина сидит на корточках у стены подвала, обхватив колени. Увидев вас, она вскакивает. 'Ты спустился! Я... я не думала, что ты действительно придёшь.'",
+                        text: "Nina is crouched by the basement wall, hugging her knees. Seeing you, she jumps up. 'You came down! I... I didn't think you'd actually come.'",
                         choices: [
-                            { text: "Ты знала, что я приду?", next: "ch2_knew" },
-                            { text: "Что ты здесь делаешь?", next: "ch2_what_doing" }
+                            { text: "You knew I'd come?", next: "ch2_knew" },
+                            { text: "What are you doing here?", next: "ch2_what_doing" }
                         ]
                     },
                     ch2_knew: {
-                        text: "'Мне сказал Сергей. Вернее... его дух. Когда он в трансе, он видит будущее. Он показал мне — ты спустишься и всё изменишь.'",
+                        text: "'Sergei told me. Or rather... his spirit. When he's in a trance, he sees the future. He showed me — you'd come down and change everything.'",
                         choices: [
-                            { text: "Что я должен изменить?", next: "ch2_change" },
-                            { text: "Сергей может видеть будущее?", next: "ch2_future", relation: 10 }
+                            { text: "What am I supposed to change?", next: "ch2_change" },
+                            { text: "Sergei can see the future?", next: "ch2_future", relation: 10 }
                         ]
                     },
                     ch2_what_doing: {
-                        text: "'Я ищу дневник отца. Маркуса. Он был моим отцом.' Её голос дрожит. 'Я хочу понять, почему он оставил меня. И как остановить этот кошмар.'",
+                        text: "'I'm looking for my father's diary. Marcus. He was my father.' Her voice trembles. 'I want to understand why he left me. And how to stop this nightmare.'",
                         choices: [
-                            { text: "Маркус — твой отец?!", next: "ch2_shock", relation: 15 },
-                            { text: "Чем я могу помочь?", next: "ch2_help_nina" }
+                            { text: "Marcus is your father?!", next: "ch2_shock", relation: 15 },
+                            { text: "How can I help?", next: "ch2_help_nina" }
                         ]
                     },
                     ch2_change: {
-                        text: "'Коллекцию. Её нужно остановить. Отец создал её, чтобы сохранить воспоминания... но она вышла из-под контроля. Теперь она питается людьми.'",
+                        text: "'The collection. It needs to be stopped. Father created it to preserve memories... but it got out of control. Now it feeds on people.'",
                         choices: [
-                            { text: "Как её остановить?", next: "ch2_stop_collection" },
-                            { text: "Можно ли её спасти?", next: "ch2_save_collection", relation: -10 }
+                            { text: "How do we stop it?", next: "ch2_stop_collection" },
+                            { text: "Can it be saved?", next: "ch2_save_collection", relation: -10 }
                         ]
                     },
                     ch2_future: {
-                        text: "'Он видит обрывки. Но одно ясно точно: у тебя есть выбор. Ты можешь уничтожить коллекцию, забрать её силу или запечатать навсегда.'",
+                        text: "'He sees fragments. But one thing is clear: you have a choice. You can destroy the collection, take its power, or seal it forever.'",
                         choices: [
-                            { text: "Что ты советуешь?", next: "ch2_advice_nina", relation: 20 }
+                            { text: "What do you advise?", next: "ch2_advice_nina", relation: 20 }
                         ]
                     },
                     ch2_shock: {
-                        text: "'Да. Я не говорила раньше, потому что не доверяла. Но теперь... теперь ты должен знать правду. Коллекция — это его душа. Если её уничтожить — он исчезнет навсегда.'",
+                        text: "'Yes. I didn't tell you before because I didn't trust you. But now... now you need to know the truth. The collection is his soul. If you destroy it — he'll disappear forever.'",
                         choices: [
-                            { text: "Но он уже исчез", next: "ch2_gone" },
-                            { text: "Я не буду уничтожать её", next: "ch2_promise", relation: 25 }
+                            { text: "But he's already gone", next: "ch2_gone" },
+                            { text: "I won't destroy it", next: "ch2_promise", relation: 25 }
                         ]
                     },
                     ch2_help_nina: {
-                        text: "'Просто... будь осторожен. Коллекция чувствует страх. Она использует твои слабости. И не верь тому, что увидишь — это иллюзии.'",
+                        text: "'Just... be careful. The collection senses fear. It uses your weaknesses. And don't believe what you see — it's all illusions.'",
                         choices: [
-                            { text: "Я буду осторожен", next: "ch2_advice_nina", relation: 10 }
+                            { text: "I'll be careful", next: "ch2_advice_nina", relation: 10 }
                         ]
                     },
                     ch2_stop_collection: {
-                        text: "'Нужно разбить сердце коллекции — золотую сферу в центре зала. Но это опасно. Отец говорил, что сфера — это якорь, удерживающий все души.'",
-                        effect: { clue: "золотая сфера = сердце коллекции" },
+                        text: "'We need to shatter the heart of the collection — the golden sphere in the center of the hall. But it's dangerous. Father said the sphere is an anchor, holding all the souls.'",
+                        effect: { clue: "golden sphere = heart of the collection" },
                         choices: [
-                            { text: "Я разобью её", next: "ch2_destroy_nina", relation: 15 },
-                            { text: "Я подумаю", next: "end_ch2_nina" }
+                            { text: "I'll shatter it", next: "ch2_destroy_nina", relation: 15 },
+                            { text: "I'll think about it", next: "end_ch2_nina" }
                         ]
                     },
                     ch2_save_collection: {
-                        text: "'Спасти? Она пожирает людей! Моего отца она сожрала!' В её глазах слёзы. 'Не повторяй его ошибок.'",
+                        text: "'Save it? It devours people! It devoured my father!' Tears fill her eyes. 'Don't repeat his mistakes.'",
                         choices: [
-                            { text: "Ты права. Я остановлю её", next: "ch2_destroy_nina", relation: 20 }
+                            { text: "You're right. I'll stop it", next: "ch2_destroy_nina", relation: 20 }
                         ]
                     },
                     ch2_advice_nina: {
-                        text: "'В центре зала будет выбор. Коллекция предложит тебе награду. Не бери ничего. Просто разбей сферу — и всё закончится.'",
+                        text: "'In the center of the hall, there will be a choice. The collection will offer you a reward. Don't take anything. Just shatter the sphere — and it'll all be over.'",
                         choices: [
-                            { text: "Я так и сделаю", next: "end_ch2_nina", relation: 15 }
+                            { text: "I will", next: "end_ch2_nina", relation: 15 }
                         ]
                     },
                     ch2_gone: {
-                        text: "'Для мира — да. Но его душа всё ещё здесь, в коллекции. Я чувствую её. Если разбить сферу — я потеряю его навсегда.' Голос её срывается.",
+                        text: "'To the world — yes. But his soul is still here, in the collection. I can feel it. If you shatter the sphere — I'll lose him forever.' Her voice breaks.",
                         choices: [
-                            { text: "Прости. Я не знал", next: "ch2_sorry", relation: 15 },
-                            { text: "Возможно, это единственный выход", next: "ch2_harsh", relation: -10 }
+                            { text: "I'm sorry. I didn't know", next: "ch2_sorry", relation: 15 },
+                            { text: "Maybe it's the only way", next: "ch2_harsh", relation: -10 }
                         ]
                     },
                     ch2_promise: {
-                        text: "'Правда?' Она смотрит на вас с надеждой. 'Тогда, может быть... может быть, я смогу ещё раз увидеть его. Поговорить с ним.'",
+                        text: "'Really?' She looks at you with hope. 'Then maybe... maybe I can see him one more time. Talk to him.'",
                         choices: [
-                            { text: "Я помогу тебе", next: "end_ch2_nina", relation: 25 }
+                            { text: "I'll help you", next: "end_ch2_nina", relation: 25 }
                         ]
                     },
                     ch2_destroy_nina: {
-                        text: "'Спасибо. Возьми это.' Она протягивает маленький серебряный колокольчик. 'Когда будешь у сферы — позвони. Это отвлечёт коллекцию на мгновение.'",
-                        effect: { addItem: "серебряный колокольчик" },
+                        text: "'Thank you. Take this.' She holds out a small silver bell. 'When you're at the sphere — ring it. It will distract the collection for a moment.'",
+                        effect: { addItem: "silver bell" },
                         choices: [
-                            { text: "Я запомню", next: "end_ch2_nina" }
+                            { text: "I'll remember", next: "end_ch2_nina" }
                         ]
                     },
                     ch2_sorry: {
-                        text: "'Всё в порядке. Ты не виноват. Но теперь ты знаешь правду. Выбор за тобой.' Она вытирает слёзы. 'Что бы ты ни решил — я приму.'",
+                        text: "'It's okay. It's not your fault. But now you know the truth. The choice is yours.' She wipes away her tears. 'Whatever you decide — I'll accept it.'",
                         choices: [
-                            { text: "Я постараюсь сделать правильный выбор", next: "end_ch2_nina", relation: 10 }
+                            { text: "I'll try to make the right choice", next: "end_ch2_nina", relation: 10 }
                         ]
                     },
                     ch2_harsh: {
-                        text: "Нина отворачивается. 'Может быть. Но я не готова его потерять. Не сегодня.'",
+                        text: "Nina turns away. 'Maybe. But I'm not ready to lose him. Not today.'",
                         choices: [
-                            { text: "Я найду другой способ", next: "end_ch2_nina" }
+                            { text: "I'll find another way", next: "end_ch2_nina" }
                         ]
                     },
                     end_ch2_nina: {
-                        text: "Нина отворачивается к стене, пряча слёзы. В темноте подвала её фигура кажется особенно хрупкой.",
+                        text: "Nina turns to the wall, hiding her tears. In the darkness of the basement, her figure seems especially fragile.",
                         choices: [
-                            { text: "Идти дальше", next: null }
+                            { text: "Move on", next: null }
                         ]
                     }
                 }
@@ -1854,7 +1854,7 @@
             gramophone.add(horn);
 
             gramophone.position.set(-2, 1.05, -0.5); // On table 1
-            gramophone.userData = { id: 'gramophone', name: 'Граммофон' };
+            gramophone.userData = { id: 'gramophone', name: 'Gramophone' };
             scene.add(gramophone);
         }
         
@@ -2641,7 +2641,7 @@
             
             keyGroup.position.set(4, 0.05, -0.5); // On the floor near right plant
             keyGroup.rotation.x = Math.PI / 2;
-            keyGroup.userData = { id: 'item_key', name: 'ключ', isItem: true };
+            keyGroup.userData = { id: 'item_key', name: 'key', isItem: true };
             scene.add(keyGroup);
             
             // Torn diary page
@@ -2651,7 +2651,7 @@
             page.position.set(-1.8, 0.76, 0.2); // On a table
             page.rotation.x = -Math.PI / 2;
             page.rotation.z = 0.3;
-            page.userData = { id: 'item_note', name: 'схема подвала', isItem: true };
+            page.userData = { id: 'item_note', name: 'basement map', isItem: true };
             scene.add(page);
         }
 
@@ -2660,7 +2660,7 @@
             if (!gameState.inventory.includes(itemName)) {
                 gameState.inventory.push(itemName);
                 updateInventory();
-                showNotification(`Вы нашли предмет: ${itemName}`);
+                showNotification(`You found an item: ${itemName}`);
                 scene.remove(itemObj);
             }
         }
@@ -2698,10 +2698,10 @@
             const doorMat = new THREE.MeshStandardMaterial({ color: 0x220000, emissive: 0x550000, emissiveIntensity: 0.5, metalness: 0.5, roughness: 0.5 });
             const door = new THREE.Mesh(doorGeo, doorMat);
             door.position.set(0, 1.75, -4.9);
-            door.userData = { id: 'secret_door', name: 'Спуск в подвал', isDoor: true };
+            door.userData = { id: 'secret_door', name: 'Descent to Basement', isDoor: true };
             scene.add(door);
             
-            showNotification("Мир изменился... Вы видите скрытое.");
+            showNotification("The world has changed... You see the hidden.");
         }
 
         function createAmbientParticles() {
@@ -2972,7 +2972,7 @@
                 skipHint.style.color = '#8a847a';
                 skipHint.style.marginTop = '10px';
                 skipHint.style.textAlign = 'right';
-                skipHint.textContent = 'Кликните для пропуска';
+                skipHint.textContent = 'Click to skip';
                 skipHint.id = 'skip-hint';
                 dialogueBox.appendChild(skipHint);
             }
@@ -2998,7 +2998,7 @@
                             };
                         } else {
                             btn.style.opacity = '0.5';
-                            btn.textContent += ' (нужен предмет)';
+                            btn.textContent += ' (item required)';
                             btn.style.cursor = 'not-allowed';
                         }
                         
@@ -3075,28 +3075,28 @@
         function applyEffect(effect) {
             if (effect.clue) {
                 gameState.cluesFound++;
-                showNotification(`Новая улика: ${effect.clue}`);
+                    showNotification(`New clue: ${effect.clue}`);
             }
             
             if (effect.addItem) {
                 if (!gameState.inventory.includes(effect.addItem)) {
                     gameState.inventory.push(effect.addItem);
                     updateInventory();
-                    showNotification(`Получено: ${effect.addItem}`);
+                    showNotification(`Obtained: ${effect.addItem}`);
                 }
             }
             
             if (effect.vision) {
-                showNotification(`Видение: ${effect.vision}`);
+                    showNotification(`Vision: ${effect.vision}`);
                 triggerVision();
             }
             
             if (effect.quest) {
-                showNotification(`Новое задание: ${effect.quest}`);
+                    showNotification(`New quest: ${effect.quest}`);
             }
             
-            if (effect.unlock === 'подвал') {
-                showNotification('Открыт доступ к подвалу!');
+            if (effect.unlock === 'basement') {
+                showNotification('Basement access unlocked!');
             }
             
             if (effect.trigger === 'go_to_basement') {
@@ -3119,18 +3119,18 @@
             inventoryDiv.innerHTML = '';
             
             const icons = {
-                'ключ': '🔑',
-                'схема подвала': '📜',
-                'код подвала': '🔢',
-                'дата открытия': '📅',
-                'фотография основателя': '📷',
-                'амулет защиты': '🔮',
-                'видение двери': '👁',
-                'коллекция = свобода': '💎',
-                'компас Элены': '🧭',
-                'ключ Марко': '🗝️',
-                'серебряный колокольчик': '🔔',
-                'знание об артефакте': '📖'
+                'key': '🔑',
+                'basement map': '📜',
+                'basement code': '🔢',
+                'opening date': '📅',
+                "founder's photo": '📷',
+                'protection amulet': '🔮',
+                'door vision': '👁',
+                'collection = freedom': '💎',
+                "Elena's compass": '🧭',
+                "Marco's Key": '🗝️',
+                'silver bell': '🔔',
+                'artifact knowledge': '📖'
             };
             
             gameState.inventory.forEach(item => {
@@ -3148,7 +3148,7 @@
             
             npcs.forEach(npc => {
                 const relation = gameState.relationships[npc.userData.id];
-                const relationText = relation > 70 ? 'Дружелюбный' : relation > 40 ? 'Нейтральный' : 'Настороженный';
+                const relationText = relation > 70 ? 'Friendly' : relation > 40 ? 'Neutral' : 'Wary';
                 
                 const card = document.createElement('div');
                 card.className = 'npc-card';
@@ -3178,15 +3178,15 @@
         }
         
         function showFinalChoice() {
-            const hasCompass = gameState.inventory.includes('компас Элены');
-            const hasKeyM = gameState.inventory.includes('ключ Марко');
-            const hasBell = gameState.inventory.includes('серебряный колокольчик');
+            const hasCompass = gameState.inventory.includes("Elena's compass");
+            const hasKeyM = gameState.inventory.includes("Marco's Key");
+            const hasBell = gameState.inventory.includes('silver bell');
             const hasAllItems = hasCompass && hasKeyM && hasBell;
             
             const talkedCh2 = gameState.talkedToCh2.elena && gameState.talkedToCh2.marco && gameState.talkedToCh2.nina;
             
             if (!talkedCh2) {
-                showNotification('Сфера не реагирует. Нужно узнать о ней больше от тех, кто здесь был.');
+                showNotification('The sphere does not react. You need to learn more about it from those who were here.');
                 return;
             }
             
@@ -3194,20 +3194,20 @@
             
             if (!hasAllItems) {
                 sphereChoice.innerHTML = `
-                    <div class="speaker-name">✦ Сердце Коллекции ✦</div>
+                    <div class="speaker-name">✦ Heart of the Collection ✦</div>
                     <div class="dialogue-text">
-                        Перед вами пульсирующая золотая сфера. Она излучает мощную энергию, но её защита слишком сильна.
+                        Before you pulses a golden sphere. It radiates powerful energy, but its protection is too strong.
                         <br><br>
-                        <em style="color:#8a847a">Вам нужно собрать три артефакта, чтобы получить доступ к силе сферы:</em>
+                        <em style="color:#8a847a">You need to gather three artifacts to access the sphere's power:</em>
                         <br>
-                        ${hasCompass ? '✅' : '❌'} Компас Элены — чтобы видеть путь сквозь иллюзии
+                        ${hasCompass ? '✅' : '❌'} Elena's Compass — to see the path through illusions
                         <br>
-                        ${hasKeyM ? '✅' : '❌'} Ключ Марко — чтобы отпереть замки коллекции
+                        ${hasKeyM ? '✅' : '❌'} Marco's Key — to unlock the collection's locks
                         <br>
-                        ${hasBell ? '✅' : '❌'} Серебряный колокольчик Нины — чтобы усмирить духов
+                        ${hasBell ? '✅' : '❌'} Nina's Silver Bell — to calm the spirits
                     </div>
                     <div class="choices">
-                        <button class="choice-btn" onclick="endDialogue()">Продолжить поиски</button>
+                        <button class="choice-btn" onclick="endDialogue()">Continue searching</button>
                     </div>
                 `;
                 sphereChoice.classList.add('visible');
@@ -3215,19 +3215,19 @@
             }
             
             sphereChoice.innerHTML = `
-                <div class="speaker-name">✦ Сердце Коллекции ✦</div>
+                <div class="speaker-name">✦ Heart of the Collection ✦</div>
                 <div class="dialogue-text">
-                    Три артефакта загораются в ваших руках. Защита сферы падает.
-                    Перед вами — пульсирующее сердце коллекции. В нём — сила сотен душ, 
-                    воспоминания Маркуса и ключ к разгадке тайны этого места.
+                    Three artifacts glow in your hands. The sphere's defenses fall.
+                    Before you lies the pulsing heart of the collection. Within it — the power of hundreds of souls,
+                    Marcus's memories, and the key to unraveling this place's mystery.
                     <br><br>
-                    <em style="color:#d4af37">Последний выбор. Он определит всё...</em>
+                    <em style="color:#d4af37">The final choice. It will decide everything...</em>
                 </div>
                 <div class="choices">
-                    <button class="choice-btn" onclick="window.finishGame('destroy')">💥 Разбить сферу — освободить все души</button>
-                    <button class="choice-btn" onclick="window.finishGame('seal')">🔒 Запечатать коллекцию навсегда</button>
-                    <button class="choice-btn" onclick="window.finishGame('power')">🔥 Принять силу коллекции</button>
-                    <button class="choice-btn" onclick="endDialogue()">Отойти и подумать</button>
+                    <button class="choice-btn" onclick="window.finishGame('destroy')">💥 Shatter the sphere — free all souls</button>
+                    <button class="choice-btn" onclick="window.finishGame('seal')">🔒 Seal the collection forever</button>
+                    <button class="choice-btn" onclick="window.finishGame('power')">🔥 Accept the collection's power</button>
+                    <button class="choice-btn" onclick="endDialogue()">Step back and think</button>
                 </div>
             `;
             sphereChoice.classList.add('visible');
@@ -3272,10 +3272,10 @@
             sphereGroup.add(glowSprite);
             
             sphereGroup.position.set(0, 0.8, -1.5);
-            sphereGroup.userData = { id: 'golden_sphere', name: 'Сердце коллекции' };
+            sphereGroup.userData = { id: 'golden_sphere', name: 'Heart of the Collection' };
             scene.add(sphereGroup);
             
-            showNotification('Вы чувствуете присутствие чего-то могущественного в центре подвала...');
+            showNotification('You feel the presence of something powerful in the center of the basement...');
         }
         
         function transitionToChapter2() {
@@ -3312,11 +3312,11 @@
                 const chTitle = document.getElementById('chapter-title');
                 const chIndicator = document.getElementById('chapter-indicator');
                 if (chTitle) {
-                    chTitle.textContent = '— Глава 2: Подвал Маркуса —';
+                    chTitle.textContent = '— Chapter 2: Marcus\'s Basement —';
                     chTitle.classList.add('visible');
                 }
                 if (chIndicator) {
-                    chIndicator.textContent = 'Глава 2: Подвал Маркуса';
+                    chIndicator.textContent = 'Chapter 2: Marcus\'s Basement';
                 }
                 
                 setTimeout(() => {
@@ -3326,12 +3326,12 @@
                         if (chTitle) chTitle.classList.remove('visible');
                         
                         // Show notification
-                        showNotification('Подвал Маркуса. Будьте осторожны...');
+                        showNotification('Marcus\'s Basement. Be careful...');
                         
                         // Update hint
                         const hint = document.getElementById('click-hint');
                         if (hint) {
-                            hint.textContent = 'Поговорите с персонажами в подвале';
+                            hint.textContent = 'Talk to the characters in the basement';
                             hint.classList.add('visible');
                             setTimeout(() => hint.classList.remove('visible'), 8000);
                         }
@@ -3352,36 +3352,36 @@
             let title, text, btnText;
             
             if (endingType === 'destroy') {
-                title = '✧ Освобождение ✧';
-                text = `Вы разбиваете золотую сферу. По подвалу проносится волна света. 
-Коллекция рассыпается в пыль. Души, пленённые в ней, обретают свободу. 
-Марко исчезает с улыбкой. Сергей приходит в себя. Нина плачет — но впервые за долгое время — от облегчения.
-Кафе навсегда изменилось. Но вы чувствуете: вы сделали правильный выбор.`;
-                btnText = 'Закончить историю';
+                title = '✧ Liberation ✧';
+                text = `You shatter the golden sphere. A wave of light rushes through the basement. 
+The collection crumbles to dust. The souls imprisoned within gain their freedom. 
+Marco disappears with a smile. Sergey regains consciousness. Nina cries — but for the first time in a long while — from relief.
+The cafe has changed forever. But you feel: you made the right choice.`;
+                btnText = 'End story';
             } else if (endingType === 'seal') {
-                title = '🔒 Печать 🔒';
-                text = `Вы запечатываете коллекцию, используя знания, полученные от Элены и Марко. 
-Сфера гаснет, но не разрушается — она погружается в сон. 
-Коллекция остаётся здесь, под кафе, но больше не угрожает никому. 
-Нина наконец находит покой. Марко остаётся хранителем. А вы уходите в рассвет. 
-Кафе продолжает работать — но теперь оно просто кафе.`;
-                btnText = 'Закончить историю';
+                title = '🔒 Seal 🔒';
+                text = `You seal the collection, using the knowledge gained from Elena and Marco. 
+The sphere dims but does not shatter — it falls into slumber. 
+The collection remains here, beneath the cafe, but no longer threatens anyone. 
+Nina finally finds peace. Marco stays as the guardian. And you walk away into the dawn. 
+The cafe continues to work — but now it is simply a cafe.`;
+                btnText = 'End story';
             } else if (endingType === 'power') {
-                title = '🔥 Власть 🔥';
-                text = `Вы принимаете дар коллекции. 
-Сфера вливается в вас — вы чувствуете невероятную силу. 
-Воспоминания сотен душ проносятся перед глазами. 
-Марко в ужасе отступает. Нина кричит вам вслед. Элена исчезает. 
-Вы выходите из кафе другим человеком. 
-Коллекция теперь — часть вас. Но что вы будете делать с этой силой?`;
-                btnText = 'Начать заново';
+                title = '🔥 Power 🔥';
+                text = `You accept the gift of the collection. 
+The sphere flows into you — you feel incredible power. 
+The memories of hundreds of souls flash before your eyes. 
+Marco recoils in horror. Nina screams after you. Elena vanishes. 
+You leave the cafe a different person. 
+The collection is now a part of you. But what will you do with this power?`;
+                btnText = 'Start over';
             } else {
-                title = '✧ Судьба Кафе ✧';
-                text = `Вы принимаете своё решение — не под давлением, не из страха, а по зову сердца.
-Коллекция чувствует это. Она открывает вам тайну Маркуса: он не исчез, он стал частью коллекции — её хранителем.
-Вы берёте его место? Или уходите, оставляя всё как есть?
-Кафе продолжает жить. Тайна остаётся. И, может быть, когда-нибудь сюда придёт новый искатель...`;
-                btnText = 'Начать заново';
+                title = '✧ Fate of the Cafe ✧';
+                text = `You make your decision — not under pressure, not from fear, but from the call of your heart.
+The collection feels this. It reveals Marcus's secret: he did not disappear, he became part of the collection — its guardian.
+Do you take his place? Or do you leave, leaving everything as it is?
+The cafe continues to live. The mystery remains. And perhaps, someday, a new seeker will come here...`;
+                btnText = 'Start over';
             }
             
             const dialogueBox = document.getElementById('dialogue-box');
@@ -3390,9 +3390,9 @@
                 <div class="dialogue-text">
                     ${text}
                     <br><br>
-                    <em style="color:#8a847a">Отношения: Элена ${gameState.relationships.elena} · Марко ${gameState.relationships.marco} · Нина ${gameState.relationships.nina}</em>
+                    <em style="color:#8a847a">Relationships: Elena ${gameState.relationships.elena} · Marco ${gameState.relationships.marco} · Nina ${gameState.relationships.nina}</em>
                     <br>
-                    <em style="color:#8a847a">Улик найдено: ${gameState.cluesFound}</em>
+                    <em style="color:#8a847a">Clues found: ${gameState.cluesFound}</em>
                 </div>
                 <div class="choices">
                     <button class="choice-btn" onclick="location.reload()">${btnText}</button>
@@ -3405,19 +3405,19 @@
             if (gameState.chapter === 1) {
                 // Check requirements for basement access
                 const talkedToAll = gameState.talkedTo.elena && gameState.talkedTo.marco && gameState.talkedTo.nina;
-                const hasAmulet = gameState.inventory.includes('амулет защиты');
-                const hasKey = gameState.inventory.includes('ключ');
+                const hasAmulet = gameState.inventory.includes('protection amulet');
+                const hasKey = gameState.inventory.includes('key');
                 
                 if (!talkedToAll) {
-                    showNotification('Нужно поговорить со всеми посетителями кафе, прежде чем спускаться в подвал.');
+                    showNotification('You need to talk to all the cafe visitors before going down to the basement.');
                     return;
                 }
                 if (!hasAmulet) {
-                    showNotification('Без защиты Нины в подвал лучше не соваться. Добудьте амулет.');
+                    showNotification('Better not go into the basement without Nina\'s protection. Get the amulet.');
                     return;
                 }
                 if (!hasKey) {
-                    showNotification('Дверь в подвал заперта. Нужен ключ.');
+                    showNotification('The basement door is locked. You need the key.');
                     return;
                 }
                 transitionToChapter2();
@@ -3430,11 +3430,11 @@
             updateNPCStatus();
             initAudio();
             
-            document.getElementById('chapter-indicator').textContent = 'Глава 1: Ночное Кафе';
+            document.getElementById('chapter-indicator').textContent = 'Chapter 1: Night Cafe';
             document.getElementById('chapter-indicator').classList.add('visible');
             
             const hintElem = document.getElementById('click-hint');
-            hintElem.textContent = 'Используйте клавиши A и D для осмотра. Кликните на персонажа для разговора.';
+            hintElem.textContent = 'Use A and D keys to look around. Click on a character to talk.';
             
             // Show hint after a delay
             setTimeout(() => {
