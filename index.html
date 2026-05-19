@@ -404,6 +404,64 @@
             z-index: 11;
             opacity: 0.3;
         }
+
+        /* Mobile controls */
+        .mobile-controls {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 40px;
+            z-index: 20;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .mobile-controls.visible {
+            opacity: 1;
+        }
+        .mobile-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            background: rgba(15, 12, 8, 0.6);
+            color: #d4af37;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            touch-action: none;
+        }
+        .mobile-btn:active {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
+        }
+        .mobile-hint {
+            position: absolute;
+            bottom: 180px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #6a655d;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.5s;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .mobile-hint.visible {
+            opacity: 0.7;
+        }
+        @media (min-width: 769px) {
+            .mobile-controls, .mobile-hint { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -411,6 +469,12 @@
         <div id="canvas-container"></div>
         <div class="vignette"></div>
         <div class="scanlines"></div>
+        
+        <div class="mobile-hint" id="mobile-hint">←  Drag or tap arrows to look around  →</div>
+        <div class="mobile-controls" id="mobile-controls">
+            <button class="mobile-btn" id="btn-left">◀</button>
+            <button class="mobile-btn" id="btn-right">▶</button>
+        </div>
         
         <div class="intro-screen" id="intro">
             <div class="intro-title">MYSTERY</div>
@@ -480,6 +544,77 @@
         window.addEventListener('keyup', (e) => {
             if(e.key.toLowerCase() === 'a' || e.key === 'ArrowLeft') keys.a = false;
             if(e.key.toLowerCase() === 'd' || e.key === 'ArrowRight') keys.d = false;
+        });
+
+        // Touch controls for mobile
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let touchMoved = false;
+        let touchId = null;
+
+        window.addEventListener('touchstart', (e) => {
+            if (!gameStarted) return;
+            if (document.getElementById('dialogue-box').classList.contains('visible')) return;
+            const touch = e.changedTouches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchMoved = false;
+            touchId = touch.identifier;
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            if (touchId === null) return;
+            const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId);
+            if (!touch) return;
+            const dx = touch.clientX - touchStartX;
+            if (Math.abs(dx) > 5) {
+                touchMoved = true;
+                playerAngle += dx * 0.005;
+                touchStartX = touch.clientX;
+            }
+        }, { passive: true });
+
+        window.addEventListener('touchend', (e) => {
+            const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId);
+            if (!touch) return;
+            touchId = null;
+            // If it was a tap (not a drag), convert to click
+            if (!touchMoved) {
+                const el = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (el) el.click();
+            }
+        }, { passive: true });
+
+        // Mobile arrow buttons
+        window.addEventListener('load', () => {
+            const btnL = document.getElementById('btn-left');
+            const btnR = document.getElementById('btn-right');
+            if (btnL && 'ontouchstart' in window) {
+                document.getElementById('mobile-controls').classList.add('visible');
+                document.getElementById('mobile-hint').classList.add('visible');
+                setTimeout(() => {
+                    document.getElementById('mobile-hint').classList.remove('visible');
+                }, 6000);
+            }
+            if (!btnL) return;
+            let lInterval, rInterval;
+            const startRot = (dir) => {
+                keys[dir] = true;
+                const interval = setInterval(() => {}, 50);
+                return interval;
+            };
+            btnL.addEventListener('touchstart', (e) => { e.preventDefault(); keys.a = true; });
+            btnL.addEventListener('touchend', () => { keys.a = false; });
+            btnL.addEventListener('touchcancel', () => { keys.a = false; });
+            btnL.addEventListener('mousedown', () => { keys.a = true; });
+            btnL.addEventListener('mouseup', () => { keys.a = false; });
+            btnL.addEventListener('mouseleave', () => { keys.a = false; });
+            btnR.addEventListener('touchstart', (e) => { e.preventDefault(); keys.d = true; });
+            btnR.addEventListener('touchend', () => { keys.d = false; });
+            btnR.addEventListener('touchcancel', () => { keys.d = false; });
+            btnR.addEventListener('mousedown', () => { keys.d = true; });
+            btnR.addEventListener('mouseup', () => { keys.d = false; });
+            btnR.addEventListener('mouseleave', () => { keys.d = false; });
         });
 
         let audioContext;
@@ -3434,7 +3569,11 @@ The cafe continues to live. The mystery remains. And perhaps, someday, a new see
             document.getElementById('chapter-indicator').classList.add('visible');
             
             const hintElem = document.getElementById('click-hint');
-            hintElem.textContent = 'Use A and D keys to look around. Click on a character to talk.';
+            if ('ontouchstart' in window) {
+                hintElem.textContent = 'Tap on a character to talk. Drag or use arrows to look around.';
+            } else {
+                hintElem.textContent = 'Use A and D keys to look around. Click on a character to talk.';
+            }
             
             // Show hint after a delay
             setTimeout(() => {
