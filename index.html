@@ -578,10 +578,25 @@
             const touch = Array.from(e.changedTouches).find(t => t.identifier === touchId);
             if (!touch) return;
             touchId = null;
-            // If it was a tap (not a drag), convert to click
             if (!touchMoved) {
+                // Update mouse coordinates for the raycaster
+                window.mouse.x = (touch.clientX / window.innerWidth) * 2 - 1;
+                window.mouse.y = -(touch.clientY / window.innerHeight) * 2 + 1;
+                // Check if tapped on a UI element (dialogue, button) — handle natively
                 const el = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (el) el.click();
+                if (el && el.closest && (
+                    el.closest('.dialogue-box') || 
+                    el.closest('.mobile-btn') || 
+                    el.closest('.choice-btn') || 
+                    el.closest('.inventory-item') ||
+                    el.closest('.notification') ||
+                    el.id === 'intro'
+                )) {
+                    if (el.click) el.click();
+                } else {
+                    // Tap on the 3D scene — call click handler with updated mouse coords
+                    onMouseClick();
+                }
             }
         }, { passive: true });
 
