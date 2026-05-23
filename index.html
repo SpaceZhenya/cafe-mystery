@@ -462,6 +462,49 @@
         @media (min-width: 769px) {
             .mobile-controls, .mobile-hint { display: none; }
         }
+
+        /* Mobile NPC name list on the left */
+        .mobile-npc-list {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 15;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        .mobile-npc-list.visible {
+            opacity: 1;
+        }
+        .mobile-npc-item {
+            background: rgba(15, 12, 8, 0.85);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            padding: 10px 14px;
+            min-width: 90px;
+            pointer-events: auto;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            transition: all 0.2s;
+            font-family: 'Playfair Display', serif;
+            font-size: 14px;
+            color: #d4af37;
+            letter-spacing: 1px;
+            text-align: left;
+        }
+        .mobile-npc-item:active {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
+            transform: scale(1.05);
+        }
+        @media (min-width: 769px) {
+            .mobile-npc-list { display: none; }
+        }
     </style>
 </head>
 <body>
@@ -470,11 +513,12 @@
         <div class="vignette"></div>
         <div class="scanlines"></div>
         
-        <div class="mobile-hint" id="mobile-hint">←  Drag or tap arrows to look around  →</div>
+        <div class="mobile-hint" id="mobile-hint">←  Swipe or tap arrows to look around  →</div>
         <div class="mobile-controls" id="mobile-controls">
             <button class="mobile-btn" id="btn-left">◀</button>
             <button class="mobile-btn" id="btn-right">▶</button>
         </div>
+        <div class="mobile-npc-list" id="mobile-npc-list"></div>
         
         <div class="intro-screen" id="intro">
             <div class="intro-title">MYSTERY</div>
@@ -3573,19 +3617,48 @@ The cafe continues to live. The mystery remains. And perhaps, someday, a new see
                 transitionToChapter2();
             }
         }
+
+        function createMobileNPCList() {
+            const listDiv = document.getElementById('mobile-npc-list');
+            if (!listDiv) return;
+            listDiv.innerHTML = '';
+            
+            Object.keys(npcData).forEach((key, i) => {
+                const item = document.createElement('div');
+                item.className = 'mobile-npc-item';
+                item.textContent = npcData[key].name;
+                item.style.transitionDelay = (i * 0.1) + 's';
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    startDialogue(key);
+                });
+                item.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    startDialogue(key);
+                });
+                listDiv.appendChild(item);
+            });
+            
+            setTimeout(() => listDiv.classList.add('visible'), 500);
+        }
         
         function startGame() {
             gameStarted = true;
             document.getElementById('intro').classList.add('hidden');
             updateNPCStatus();
             initAudio();
+            if ('ontouchstart' in window) createMobileNPCList();
             
             document.getElementById('chapter-indicator').textContent = 'Chapter 1: Night Cafe';
             document.getElementById('chapter-indicator').classList.add('visible');
             
             const hintElem = document.getElementById('click-hint');
             if ('ontouchstart' in window) {
-                hintElem.textContent = 'Tap on a character to talk. Drag or use arrows to look around.';
+                hintElem.textContent = 'Tap a name on the left to talk';
+                setTimeout(() => {
+                    hintElem.classList.add('visible');
+                    setTimeout(() => hintElem.classList.remove('visible'), 5000);
+                }, 1000);
             } else {
                 hintElem.textContent = 'Use A and D keys to look around. Click on a character to talk.';
             }
