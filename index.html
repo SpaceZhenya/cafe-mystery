@@ -267,6 +267,50 @@
             transform: scale(1.05);
         }
         
+        .intro-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .continue-btn {
+            font-family: 'Playfair Display', serif;
+            font-size: 18px;
+            color: #d4af37;
+            background: transparent;
+            border: 2px solid #d4af37;
+            padding: 15px 50px;
+            border-radius: 30px;
+            cursor: pointer;
+            letter-spacing: 3px;
+            transition: all 0.4s;
+        }
+        
+        .continue-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+            transform: scale(1.05);
+        }
+        
+        .reset-btn {
+            font-family: 'Source Sans Pro', sans-serif;
+            font-size: 13px;
+            color: #6a655d;
+            background: transparent;
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 8px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+        }
+        
+        .reset-btn:hover {
+            color: #c0392b;
+            border-color: #c0392b;
+        }
+        
         .notification {
             position: absolute;
             top: 50%;
@@ -548,7 +592,9 @@
         <div class="intro-screen" id="intro">
             <div class="intro-title">MYSTERY</div>
             <div class="intro-subtitle">OF THE NIGHT CAFE</div>
-            <button class="start-btn" onclick="startGame()">START</button>
+            <div class="intro-buttons" id="intro-buttons">
+                <button class="start-btn" id="btn-start" onclick="startGame()">START</button>
+            </div>
         </div>
         
         <div id="ui-overlay">
@@ -592,6 +638,7 @@
         const gameState = {
             relationships: {},
             inventory: [],
+            collectedItems: [],
             cluesFound: 0,
             talkedTo: {},
             talkedToCh2: {},
@@ -601,6 +648,65 @@
             sergeyRescued: false,
             basementSecretFound: false
         };
+        
+        // Save / Load System
+        const SAVE_KEY = 'cafe_mystery_save';
+        
+        function saveGame() {
+            try {
+                const data = JSON.stringify(gameState);
+                localStorage.setItem(SAVE_KEY, data);
+            } catch(e) {
+                console.warn('Save failed:', e);
+            }
+        }
+        
+        function loadGame() {
+            try {
+                const data = localStorage.getItem(SAVE_KEY);
+                if (!data) return false;
+                const saved = JSON.parse(data);
+                Object.assign(gameState, saved);
+                return true;
+            } catch(e) {
+                console.warn('Load failed:', e);
+                return false;
+            }
+        }
+        
+        function resetGame() {
+            localStorage.removeItem(SAVE_KEY);
+            location.reload();
+        }
+        
+        function hasSave() {
+            return localStorage.getItem(SAVE_KEY) !== null;
+        }
+        
+        function continueGame() {
+            if (!loadGame()) {
+                startGame();
+                return;
+            }
+            document.getElementById('intro').classList.add('hidden');
+            gameStarted = true;
+            initAudio();
+            createMobileNPCList();
+            updateInventory();
+            updateNPCStatus();
+            
+            if (gameState.chapter === 2) {
+                document.getElementById('chapter-indicator').textContent = 'Chapter 2: The Basement of Marcus';
+                document.getElementById('chapter-indicator').classList.add('visible');
+            } else {
+                document.getElementById('chapter-indicator').textContent = 'Chapter 1: Night Cafe';
+                document.getElementById('chapter-indicator').classList.add('visible');
+            }
+        }
+
+        function autoSave() {
+            if (gameStarted) saveGame();
+        }
         
         // Input and Audio
         let playerAngle = 0;
@@ -2884,10 +2990,13 @@
             const itemName = itemObj.userData.name;
             if (!gameState.inventory.includes(itemName)) {
                 gameState.inventory.push(itemName);
+                gameState.collectedItems.push(itemObj.userData.id || itemName);
                 updateInventory();
-                showNotification(`You found an item: ${itemName}`);
+                showNotification(`You found: ${itemName}`);
                 scene.remove(itemObj);
+                autoSave();
             }
+        }
         }
 
         function triggerVision() {
@@ -3337,6 +3446,8 @@
             if (effect.trigger === 'ending_power') {
                 triggerEnding('power');
             }
+            
+            autoSave();
         }
         
         function updateInventory() {
@@ -3505,6 +3616,7 @@
         
         function transitionToChapter2() {
             gameState.chapter = 2;
+            autoSave();
             
             // Fade out effect
             const overlay = document.createElement('div');
@@ -3674,6 +3786,8 @@ The cafe continues to live. The mystery remains. And perhaps, someday, a new see
         }
         
         function startGame() {
+            // Clear any existing save for a fresh start
+            localStorage.removeItem(SAVE_KEY);
             gameStarted = true;
             document.getElementById('intro').classList.add('hidden');
             updateNPCStatus();
@@ -3702,10 +3816,21 @@ The cafe continues to live. The mystery remains. And perhaps, someday, a new see
             setTimeout(() => {
                 hintElem.classList.remove('visible');
             }, 10000);
+            
+            saveGame();
         }
         
         // Initialize on load
-        window.onload = init;
+        window.onload = function() {
+            init();
+            if (hasSave()) {
+                const btnGroup = document.getElementById('intro-buttons');
+                btnGroup.innerHTML = `
+                    <button class="continue-btn" onclick="continueGame()">CONTINUE</button>
+                    <button class="reset-btn" onclick="resetGame()">RESET</button>
+                `;
+            }
+        };
     </script>
 </body>
 </html>
