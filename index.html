@@ -530,38 +530,6 @@
             .chapter-title { font-size: 20px; }
             .vignette { background: radial-gradient(circle, transparent 20%, rgba(20, 10, 0, 0.6) 100%); }
         }
-            opacity: 0;
-            transition: opacity 0.5s;
-            pointer-events: none;
-        }
-        .mobile-npc-list.visible {
-            opacity: 1;
-        }
-        .mobile-npc-item {
-            background: rgba(15, 12, 8, 0.85);
-            border: 1px solid rgba(212, 175, 55, 0.3);
-            border-radius: 8px;
-            padding: 10px 14px;
-            min-width: 90px;
-            pointer-events: auto;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            transition: all 0.2s;
-            font-family: 'Playfair Display', serif;
-            font-size: 14px;
-            color: #d4af37;
-            letter-spacing: 1px;
-            text-align: left;
-        }
-        .mobile-npc-item:active {
-            background: rgba(212, 175, 55, 0.2);
-            border-color: #d4af37;
-            transform: scale(1.05);
-        }
-        @media (min-width: 769px) {
-            .mobile-npc-list { display: none; }
-        }
     </style>
 </head>
 <body>
